@@ -1,0 +1,7 @@
+D:\LuaCSharp\luacsharp\luacsharp\bin\Debug\luacsharp.dll
+D:\LuaCSharp\luacsharp\luacsharp\bin\Debug\luacsharp.pdb
+D:\LuaCSharp\luacsharp\luacsharp\obj\Debug\luacsharp.csproj.AssemblyReference.cache
+D:\LuaCSharp\luacsharp\luacsharp\obj\Debug\luacsharp.csproj.ResolveComReference.cache
+D:\LuaCSharp\luacsharp\luacsharp\obj\Debug\luacsharp.csproj.CoreCompileInputs.cache
+D:\LuaCSharp\luacsharp\luacsharp\obj\Debug\luacsharp.dll
+D:\LuaCSharp\luacsharp\luacsharp\obj\Debug\luacsharp.pdb
