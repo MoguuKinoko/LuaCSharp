@@ -65,6 +65,20 @@ namespace luacsharp.state
 
             return null;
         }
+        
+        internal void setTable(int idx, LuaValue k, LuaValue v)
+        {
+            var t = get(idx);
+            if (new LuaValue(t).isLuaTable())
+            {
+                var tbl = (LuaTable) t;
+                tbl.put(k, v);
+                set(idx, tbl);
+                return;
+            }
+
+            throw new Exception("not a table!");
+        }
 
         internal object pop()
         {

@@ -52,21 +52,26 @@
         <Compile Include="state\APIAccess.cs" />
         <Compile Include="state\APIArith.cs" />
         <Compile Include="state\APICompare.cs" />
+        <Compile Include="state\APIGet.cs" />
         <Compile Include="state\APIMisc.cs" />
+        <Compile Include="state\APISet.cs" />
         <Compile Include="state\APIVM.cs" />
         <Compile Include="state\LuaStack.cs" />
         <Compile Include="state\LuaState.cs" />
         <Compile Include="state\LuaTable.cs" />
         <Compile Include="state\LuaValue.cs" />
         <Compile Include="util\ConvertUtil.cs" />
+        <Compile Include="vm\Fpb.cs" />
         <Compile Include="vm\InscFor.cs" />
         <Compile Include="vm\InscLoad.cs" />
         <Compile Include="vm\InscMisc.cs" />
         <Compile Include="vm\InscOperators.cs" />
+        <Compile Include="vm\InscTable.cs" />
     </ItemGroup>
     <ItemGroup>
       <Content Include="lua\hello_world.lua" />
       <Content Include="lua\sum.lua" />
+      <Content Include="lua\test.lua" />
     </ItemGroup>
     <ItemGroup>
       <COMReference Include="System">

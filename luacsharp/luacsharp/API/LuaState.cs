@@ -49,5 +49,14 @@ namespace luacsharp.API
         bool Compare(int idx1, int idx2, CompareOp op);
         void Len(int idx);
         void Concat(int n);
+        
+        void NewTable();
+        void CreateTable(int nArr, int nRec);
+        LuaType GetTable(int idx);
+        LuaType GetField(int idx, string k);
+        LuaType GetI(int idx, long i);
+        void SetTable(int idx);
+        void SetField(int idx, string k);
+        void SetI(int idx, long n);
     }
 }

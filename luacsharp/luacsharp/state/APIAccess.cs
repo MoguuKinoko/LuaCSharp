@@ -24,9 +24,12 @@ namespace luacsharp.state
 
         public LuaType Type(int idx)
         {
-            if (!stack.isValid(idx)) return Consts.LUA_TNONE;
+            if (!stack.isValid(idx))
+            {
+                return Consts.LUA_TNONE;
+            }
             var val = stack.get(idx);
-            return LuaValue.typeOf(val);
+            return new LuaValue(val).typeOf();
         }
 
         public bool IsNone(int idx)

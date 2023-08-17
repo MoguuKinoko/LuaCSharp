@@ -53,19 +53,20 @@ namespace luacsharp.state
             return value.GetType().IsEquivalentTo(typeof(long));
         }
         
-        internal static LuaType typeOf(object val)
+        internal LuaType typeOf()
         {
-            if (val == null)
+            if (value == null)
             {
                 return Consts.LUA_TNIL;
             }
             
-            switch (val.GetType().Name)
+            switch (value.GetType().Name)
             {
                 case "Boolean": return Consts.LUA_TBOOLEAN;
                 case "Double": return Consts.LUA_TNUMBER;
                 case "Int64": return Consts.LUA_TNUMBER;
                 case "String": return Consts.LUA_TSTRING;
+                case "LuaTable": return Consts.LUA_TTABLE;
                 default: throw new Exception("todo!");
             }
         }

@@ -97,11 +97,11 @@ namespace luacsharp.Opcodes
             new opcode(0, 1, OpArgU, OpArgN, IABC, "LOADNIL ", InscLoad.loadNil), // R(A), R(A+1), ..., R(A+B) := nil
             new opcode(0, 1, OpArgU, OpArgN, IABC, "GETUPVAL", null), // R(A) := UpValue[B]
             new opcode(0, 1, OpArgU, OpArgK, IABC, "GETTABUP", null), // R(A) := UpValue[B][RK(C)]
-            new opcode(0, 1, OpArgR, OpArgK, IABC /* */, "GETTABLE", null), // R(A) := R(B)[RK(C)]
+            new opcode(0, 1, OpArgR, OpArgK, IABC /* */, "GETTABLE", InscTable.getTable), // R(A) := R(B)[RK(C)]
             new opcode(0, 0, OpArgK, OpArgK, IABC /* */, "SETTABUP", null), // UpValue[A][RK(B)] := RK(C)
             new opcode(0, 0, OpArgU, OpArgN, IABC /* */, "SETUPVAL", null), // UpValue[B] := R(A)
-            new opcode(0, 0, OpArgK, OpArgK, IABC /* */, "SETTABLE", null), // R(A)[RK(B)] := RK(C)
-            new opcode(0, 1, OpArgU, OpArgU, IABC /* */, "NEWTABLE", null), // R(A) := {} (size = B,C)
+            new opcode(0, 0, OpArgK, OpArgK, IABC /* */, "SETTABLE", InscTable.setTable), // R(A)[RK(B)] := RK(C)
+            new opcode(0, 1, OpArgU, OpArgU, IABC /* */, "NEWTABLE", InscTable.newTable), // R(A) := {} (size = B,C)
             new opcode(0, 1, OpArgR, OpArgK, IABC /* */, "SELF    ", null), // R(A+1) := R(B); R(A) := R(B)[RK(C)]
             new opcode(0, 1, OpArgK, OpArgK, IABC /* */, "ADD     ", InscOperators.add), // R(A) := RK(B) + RK(C)
             new opcode(0, 1, OpArgK, OpArgK, IABC /* */, "SUB     ", InscOperators.sub), // R(A) := RK(B) - RK(C)
@@ -133,7 +133,7 @@ namespace luacsharp.Opcodes
             new opcode(0, 1, OpArgR, OpArgN, IAsBx /**/, "FORPREP ", InscFor.forPrep), // R(A)-=R(A+2); pc+=sBx
             new opcode(0, 0, OpArgN, OpArgU, IABC /* */, "TFORCALL", null),
             new opcode(0, 1, OpArgR, OpArgN, IAsBx /**/, "TFORLOOP", null),
-            new opcode(0, 0, OpArgU, OpArgU, IABC /* */, "SETLIST ", null),
+            new opcode(0, 0, OpArgU, OpArgU, IABC /* */, "SETLIST ", InscTable.setList),
             new opcode(0, 1, OpArgU, OpArgN, IABx /* */, "CLOSURE ", null),
             new opcode(0, 1, OpArgU, OpArgN, IABC /* */, "VARARG  ", null),
             new opcode(0, 0, OpArgU, OpArgU, IAx /*  */, "EXTRAARG", null),

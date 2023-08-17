@@ -7,10 +7,15 @@ namespace luacsharp.state
         public void Len(int idx)
         {
             var val = stack.get(idx);
-            if (val.GetType().Name.Equals("String"))
+            if (new LuaValue(val).isString())
             {
-                var s = (string) val;
+                var s = new LuaValue(val).toString();
                 stack.push((long) s.Length);
+            }
+            else if (new LuaValue(val).isLuaTable())
+            {
+                var t = new LuaValue(val).toLuaTable();
+                stack.push((long) t.len());
             }
             else
             {
