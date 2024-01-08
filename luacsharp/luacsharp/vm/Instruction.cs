@@ -1,8 +1,8 @@
 using System;
 using luacsharp;
-using LuaVm = luacsharp.API.LuaState;
+using LuaVm = luacsharp.state.LuaState;
 
-namespace luacsharp.Opcodes
+namespace luacsharp.vm
 {
     public class Instruction
     {
@@ -67,12 +67,12 @@ namespace luacsharp.Opcodes
             return OpCodes.opcodes[Opcode()].argCMode;
         }
         
-        public void Execute(LuaVm vm)
+        public void Execute(ref LuaVm vm)
         {
             var action = OpCodes.opcodes[Opcode()].action;
             if (action != null)
             {
-                action(this, vm);
+                action(this, ref vm);
             }
             else
             {

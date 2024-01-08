@@ -1,17 +1,22 @@
 using System;
+using System.Linq;
 
 namespace luacsharp.state
 {
-    public struct LuaStack
+    public class LuaStack
     {
-        private LuaValue[] slots;
+        public object[] slots;
         internal int top;
+        internal LuaStack prev;
+        internal Closure closure;
+        internal object[] varargs;
+        internal int pc;
 
         internal static LuaStack newLuaStack(int size)
         {
             return new LuaStack
             {
-                slots = new LuaValue[size],
+                slots = new object[size],
                 top = 0
             };
         }
@@ -19,13 +24,13 @@ namespace luacsharp.state
         internal void check(int n)
         {
             var free = slots.Length - top;
-            if (n <= free)
+            var slotList = slots.ToList();
+            for (var i = free; i < n; i++)
             {
-                return;
+                slotList.Add(null);
             }
-            var newSlots = new LuaValue[top + n];
-            Array.Copy(slots, newSlots, slots.Length);
-            slots = newSlots;
+
+            slots = slotList.ToArray();
         }
 
         internal void push(object val)
@@ -35,7 +40,8 @@ namespace luacsharp.state
                 throw new Exception("stack overflow!");
             }
 
-            slots[top] = new LuaValue(val);
+            slots[top] = val;
+
             top++;
         }
 
@@ -60,24 +66,10 @@ namespace luacsharp.state
             var absIdx = absIndex(idx);
             if (absIdx > 0 && absIdx <= top)
             {
-                return slots[absIdx - 1].value;
+                return slots[absIdx - 1];
             }
 
             return null;
-        }
-        
-        internal void setTable(int idx, LuaValue k, LuaValue v)
-        {
-            var t = get(idx);
-            if (new LuaValue(t).isLuaTable())
-            {
-                var tbl = (LuaTable) t;
-                tbl.put(k, v);
-                set(idx, tbl);
-                return;
-            }
-
-            throw new Exception("not a table!");
         }
 
         internal object pop()
@@ -88,27 +80,60 @@ namespace luacsharp.state
             }
 
             top--;
-            var val = slots[top].value;
+            var val = slots[top];
             slots[top] = null;
             return val;
         }
+
+        internal void pushN(object[] vals, int n)
+        {
+            var nVals = vals.Length;
+            if (n < 0)
+            {
+                n = nVals;
+            }
+
+            for (var i = 0; i < n; i++)
+            {
+                if (i < nVals)
+                {
+                    push(vals[i]);
+                }
+                else
+                {
+                    push(null);
+                }
+            }
+        }
+
+        internal object[] popN(int n)
+        {
+            var vals = new object[n];
+            for (var i = n - 1; i >= 0; i--)
+            {
+                vals[i] = pop();
+            }
+
+            return vals;
+        }
+
 
         internal void set(int idx, object val)
         {
             var absIdx = absIndex(idx);
             if (absIdx <= 0 || absIdx > top) throw new Exception("invalid index!");
-            slots[absIdx - 1] = new LuaValue(val);
+            slots[absIdx - 1] = val;
         }
 
         internal void reverse(int from, int to)
         {
             if (to > from)
             {
-                System.Array.Reverse(slots, from, to - from + 1);
+                Array.Reverse(slots, from, to - from + 1);
             }
             else if (to < from)
             {
-                System.Array.Reverse(slots, to, from - to + 1);
+                Array.Reverse(slots, to, from - to + 1);
             }
         }
     }

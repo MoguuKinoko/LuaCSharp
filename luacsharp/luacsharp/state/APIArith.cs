@@ -5,7 +5,7 @@ using CompareOp = System.Int32;
 
 namespace luacsharp.state
 {
-    internal delegate long IntegerFunc(long a, long b);
+     internal delegate long IntegerFunc(long a, long b);
 
     internal delegate double FloatFunc(double a, double b);
 
@@ -195,8 +195,8 @@ namespace luacsharp.state
 
         public void Arith(ArithOp op)
         {
-            LuaValue a, b;
-            b = new LuaValue(stack.pop());
+            LuaValue a;
+            var b = new LuaValue(stack.pop());
             if (op != Consts.LUA_OPUNM && op != Consts.LUA_OPBNOT)
             {
                 a = new LuaValue(stack.pop());
@@ -222,10 +222,10 @@ namespace luacsharp.state
         {
             if (op.floatFunc == null)
             {
-                Tuple<long, bool> v = LuaValue.convertToInteger(a.value);
+                Tuple<long, bool> v = LuaValue.convertToInteger(a);
                 if (v.Item2)
                 {
-                    Tuple<long, bool> v2 = LuaValue.convertToInteger(b.value);
+                    Tuple<long, bool> v2 = LuaValue.convertToInteger(b);
                     if (v2.Item2)
                     {
                         return op.integerFunc(v.Item1, v2.Item1);
@@ -236,18 +236,18 @@ namespace luacsharp.state
             {
                 if (op.integerFunc != null)
                 {
-                    if (a.value.GetType().Name.Equals("Int64") && b.value.GetType().Name.Equals("Int64"))
+                    if (a.isInteger() && b.isInteger())
                     {
-                        var x = long.Parse(a.value.ToString());
-                        var y = long.Parse(b.value.ToString());
+                        var x = a.toInteger();
+                        var y = b.toInteger();
                         return op.integerFunc(x, y);
                     }
                 }
 
-                var v = LuaValue.convertToFloat(a.value);
+                var v = LuaValue.convertToFloat(a);
                 if (v.Item2)
                 {
-                    var v2 = LuaValue.convertToFloat(b.value);
+                    var v2 = LuaValue.convertToFloat(b);
                     if (v2.Item2)
                     {
                         return op.floatFunc(v.Item1, v2.Item1);

@@ -4,20 +4,20 @@ namespace luacsharp.state
 {
     partial struct LuaState
     {
+        public void NewTable()
+        {
+            CreateTable(0, 0);
+        }
+
         public void CreateTable(int nArr, int nRec)
         {
             var t = LuaTable.newLuaTable(nArr, nRec);
             stack.push(t);
         }
-        
-        public void NewTable()
-        {
-            CreateTable(0, 0);
-        }
-        
+
         public int GetTable(int idx)
         {
-            var t = new LuaValue(stack.get(idx)).toLuaTable();
+            var t = new LuaValue(stack.get(idx));
             var k = stack.pop();
             return getTable(new LuaValue(t), new LuaValue(k));
         }
@@ -39,10 +39,10 @@ namespace luacsharp.state
 
             throw new Exception("not a table!");
         }
-        
+
         public LuaType GetField(int idx, string k)
         {
-            var t = new LuaValue(stack.get(idx)).toLuaTable();
+            var t = new LuaValue(stack.get(idx));
             return getTable(new LuaValue(t), new LuaValue(k));
 //            PushString(k);
 //            return GetTable(idx);
@@ -50,7 +50,7 @@ namespace luacsharp.state
 
         public LuaType GetI(int idx, long i)
         {
-            var t = new LuaValue(stack.get(idx)).toLuaTable();
+            var t = new LuaValue(stack.get(idx));
             return getTable(new LuaValue(t), new LuaValue(i));
         }
     }

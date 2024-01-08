@@ -1,4 +1,4 @@
-namespace luacsharp.BinaryChunk
+namespace luacsharp.binchunk
 {
      struct binaryChunk
     {
@@ -78,7 +78,7 @@ namespace luacsharp.BinaryChunk
 
         public static Prototype Undump(byte[] data)
         {
-            var reader = new Reader { data = data };
+            var reader = new Reader {data = data};
             reader.checkHeader();
             reader.readByte();
             return reader.readProto("");

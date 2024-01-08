@@ -1,32 +1,32 @@
 using System;
-using luacsharp.BinaryChunk;
+using luacsharp.binchunk;
 
 namespace luacsharp.state
 {
     public partial struct LuaState : API.LuaState
     {
-        private LuaStack stack;
-        private Prototype proto;
-        private int pc;
+        public LuaStack stack;
 
-        public API.LuaState New(int stackSize, Prototype proto)
+        public static API.LuaState New(int stackSize)
         {
             return new LuaState
             {
-                stack = LuaStack.newLuaStack(stackSize),
-                proto = proto,
-                pc = 0
+                stack = LuaStack.newLuaStack(stackSize)
             };
         }
 
-        public API.LuaState New()
+
+        internal void pushLuaStack(LuaStack stack)
         {
-            return new LuaState
-            {
-                stack = LuaStack.newLuaStack(20),
-                // proto = null,
-                pc = 0,
-            };
+            stack.prev = this.stack;
+            this.stack = stack;
+        }
+
+        internal void popLuaStack()
+        {
+            var stack = this.stack;
+            this.stack = stack.prev;
+            stack.prev = null;
         }
 
         public int LuaType { get; set; }
@@ -123,32 +123,6 @@ namespace luacsharp.state
                     stack.push(null);
                 }
             }
-        }
-        
-
-        public void PushNil()
-        {
-            stack.push(null);
-        }
-
-        public void PushBoolean(bool b)
-        {
-            stack.push(b);
-        }
-
-        public void PushInteger(long n)
-        {
-            stack.push(n);
-        }
-
-        public void PushNumber(double n)
-        {
-            stack.push(n);
-        }
-
-        public void PushString(string s)
-        {
-            stack.push(s);
         }
     }
 }

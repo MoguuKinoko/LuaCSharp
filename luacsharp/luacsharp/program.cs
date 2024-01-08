@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using luacsharp.API;
-using luacsharp.BinaryChunk;
-using luacsharp.Opcodes;
+using luacsharp.binchunk;
+using luacsharp.vm;
 
 
 namespace luacsharp
@@ -20,13 +20,13 @@ namespace luacsharp
         {
             try
             {
-                string[] args = new string[] { "D:/luacsharp/luacsharp/luacsharp/lua/luac.out" };
-                var fs = File.OpenRead(args[0]);
-                var data = new byte[fs.Length];
-                fs.Read(data, 0, data.Length);
-                var proto = luacsharp.BinaryChunk.BinaryChunk.Undump(data);
-                luaMain(proto);
-                list(proto);
+                string[] args = new string[] { "E:/luacsharp/luacsharp/luacsharp/lua/luac.out" };
+                // var fs = File.OpenRead(args[0]);
+                // var data = new byte[fs.Length];
+                // fs.Read(data, 0, data.Length);
+                // var proto = luacsharp.BinaryChunk.BinaryChunk.Undump(data);
+                // luaMain(proto);
+                // list(proto);
 
                 // var ls = new state.LuaState().New();
                 // ls.PushInteger(1);
@@ -43,6 +43,22 @@ namespace luacsharp
                 // printStack(ls);
                 // ls.Concat(3);
                 // printStack(ls);
+                
+                if (args.Length <= 0) return;
+                try
+                {
+                    var fs = File.OpenRead(args[0]);
+                    var data = new byte[fs.Length];
+                    fs.Read(data, 0, data.Length);
+
+                    var ls = state.LuaState.New(20);
+                    ls.Load(ref data, args[0], "b");
+                    ls.Call(0, 0);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
             }
             catch (Exception e)
             {
@@ -50,28 +66,28 @@ namespace luacsharp
             }
         }
         
-        static void luaMain(Prototype proto)
-        {
-            var nRegs = proto.MaxStackSize;
-            var ls = new state.LuaState().New(nRegs + 8, proto);
-            ls.SetTop(nRegs);
-            for (;;)
-            {
-                var pc = ls.PC();
-                var inst = new Instruction(ls.Fetch());
-                var opCode = inst.Opcode();
-                if (opCode != OpCodes.OP_RETURN)
-                {
-                    inst.Execute(ls);
-                    Console.Write("[{0:D2}] {1}", pc + 1, inst.OpName());
-                    printStack(ls);
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
+        // static void luaMain(Prototype proto)
+        // {
+        //     var nRegs = proto.MaxStackSize;
+        //     var ls = new state.LuaState().New(nRegs + 8, proto);
+        //     ls.SetTop(nRegs);
+        //     for (;;)
+        //     {
+        //         var pc = ls.PC();
+        //         var inst = new Instruction(ls.Fetch());
+        //         var opCode = inst.Opcode();
+        //         if (opCode != OpCodes.OP_RETURN)
+        //         {
+        //             // inst.Execute(ls);
+        //             Console.Write("[{0:D2}] {1}", pc + 1, inst.OpName());
+        //             printStack(ls);
+        //         }
+        //         else
+        //         {
+        //             break;
+        //         }
+        //     }
+        // }
         
         private static void list(Prototype f)
         {

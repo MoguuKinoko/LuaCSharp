@@ -1,7 +1,7 @@
 using System;
 using luacsharp.API;
-using luacsharp.Opcodes;
-using LuaVm = luacsharp.API.LuaState;
+using luacsharp.vm;
+using LuaVM = luacsharp.state.LuaState;
 using ArithOp = System.Int32;
 using CompareOp = System.Int32;
 
@@ -9,7 +9,7 @@ namespace luacsharp.vm
 {
     public class InscOperators
     {
-         internal static void _binaryArith(Instruction i, LuaVm vm, ArithOp op)
+        private static void _binaryArith(Instruction i, LuaVM vm, ArithOp op)
         {
             var abc = i.ABC();
             var a = abc.Item1 + 1;
@@ -22,7 +22,7 @@ namespace luacsharp.vm
             vm.Replace(a);
         }
 
-        internal static void _unaryArith(Instruction i, LuaVm vm, ArithOp op)
+        private static void _unaryArith(Instruction i, LuaVM vm, ArithOp op)
         {
             var ab_ = i.ABC();
             var a = ab_.Item1 + 1;
@@ -33,77 +33,77 @@ namespace luacsharp.vm
             vm.Replace(a);
         }
 
-        internal static void add(Instruction i, LuaVm vm)
+        internal static void add(Instruction i, ref LuaVM vm)
         {
             _binaryArith(i, vm, Consts.LUA_OPADD);
         }
 
-        internal static void sub(Instruction i, LuaVm vm)
+        internal static void sub(Instruction i, ref LuaVM vm)
         {
             _binaryArith(i, vm, Consts.LUA_OPSUB);
         }
 
-        internal static void mul(Instruction i, LuaVm vm)
+        internal static void mul(Instruction i, ref LuaVM vm)
         {
             _binaryArith(i, vm, Consts.LUA_OPMUL);
         }
 
-        internal static void mod(Instruction i, LuaVm vm)
+        internal static void mod(Instruction i, ref LuaVM vm)
         {
             _binaryArith(i, vm, Consts.LUA_OPMOD);
         }
 
-        internal static void pow(Instruction i, LuaVm vm)
+        internal static void pow(Instruction i, ref LuaVM vm)
         {
             _binaryArith(i, vm, Consts.LUA_OPPOW);
         }
 
-        internal static void div(Instruction i, LuaVm vm)
+        internal static void div(Instruction i, ref LuaVM vm)
         {
             _binaryArith(i, vm, Consts.LUA_OPDIV);
         }
 
-        internal static void idiv(Instruction i, LuaVm vm)
+        internal static void idiv(Instruction i, ref LuaVM vm)
         {
             _binaryArith(i, vm, Consts.LUA_OPIDIV);
         }
 
-        internal static void band(Instruction i, LuaVm vm)
+        internal static void band(Instruction i, ref LuaVM vm)
         {
             _binaryArith(i, vm, Consts.LUA_OPBAND);
         }
 
-        internal static void bor(Instruction i, LuaVm vm)
+        internal static void bor(Instruction i, ref LuaVM vm)
         {
             _binaryArith(i, vm, Consts.LUA_OPBOR);
         }
 
-        internal static void bxor(Instruction i, LuaVm vm)
+        internal static void bxor(Instruction i, ref LuaVM vm)
         {
             _binaryArith(i, vm, Consts.LUA_OPBXOR);
         }
 
-        internal static void shl(Instruction i, LuaVm vm)
+        internal static void shl(Instruction i, ref LuaVM vm)
         {
             _binaryArith(i, vm, Consts.LUA_OPSHL);
         }
 
-        internal static void shr(Instruction i, LuaVm vm)
+        internal static void shr(Instruction i, ref LuaVM vm)
         {
             _binaryArith(i, vm, Consts.LUA_OPSHR);
         }
 
-        internal static void unm(Instruction i, LuaVm vm)
+        internal static void unm(Instruction i, ref LuaVM vm)
         {
             _unaryArith(i, vm, Consts.LUA_OPUNM);
         }
 
-        internal static void bnot(Instruction i, LuaVm vm)
+        internal static void bnot(Instruction i, ref LuaVM vm)
         {
             _unaryArith(i, vm, Consts.LUA_OPBNOT);
         }
 
-        internal static void length(Instruction i, LuaVm vm)
+        internal static void length(Instruction i, ref LuaVM vm)
         {
             var abc = i.ABC();
             var a = abc.Item1 + 1;
@@ -113,7 +113,7 @@ namespace luacsharp.vm
             vm.Replace(a);
         }
 
-        internal static void concat(Instruction i, LuaVm vm)
+        internal static void concat(Instruction i, ref LuaVM vm)
         {
             var abc = i.ABC();
             var a = abc.Item1 + 1;
@@ -131,12 +131,12 @@ namespace luacsharp.vm
             vm.Replace(a);
         }
 
-        internal static void _compare(Instruction i, LuaVm vm, CompareOp op)
+        internal static void _compare(Instruction i, ref LuaVM vm, CompareOp op)
         {
             var abc = i.ABC();
-            var a = abc.Item1 + 1;
-            var b = abc.Item2 + 1;
-            var c = abc.Item3 + 1;
+            var a = abc.Item1;
+            var b = abc.Item2;
+            var c = abc.Item3;
 
             vm.GetRK(b);
             vm.GetRK(c);
@@ -148,22 +148,22 @@ namespace luacsharp.vm
             vm.Pop(2);
         }
 
-        internal static void eq(Instruction i, LuaVm vm)
+        internal static void eq(Instruction i, ref LuaVM vm)
         {
-            _compare(i, vm, Consts.LUA_OPEQ);
+            _compare(i, ref vm, Consts.LUA_OPEQ);
         }
 
-        internal static void lt(Instruction i, LuaVm vm)
+        internal static void lt(Instruction i, ref LuaVM vm)
         {
-            _compare(i, vm, Consts.LUA_OPLT);
+            _compare(i, ref vm, Consts.LUA_OPLT);
         }
 
-        internal static void le(Instruction i, LuaVm vm)
+        internal static void le(Instruction i, ref LuaVM vm)
         {
-            _compare(i, vm, Consts.LUA_OPLE);
+            _compare(i, ref vm, Consts.LUA_OPLE);
         }
 
-        internal static void not(Instruction i, LuaVm vm)
+        internal static void not(Instruction i, ref LuaVM vm)
         {
             var abc = i.ABC();
             var a = abc.Item1 + 1;
@@ -174,7 +174,7 @@ namespace luacsharp.vm
             vm.Replace(a);
         }
 
-        internal static void test(Instruction i, LuaVm vm)
+        internal static void test(Instruction i, ref LuaVM vm)
         {
             var abc = i.ABC();
             var a = abc.Item1 + 1;
@@ -187,7 +187,7 @@ namespace luacsharp.vm
             }
         }
 
-        internal static void testSet(Instruction i, LuaVm vm)
+        internal static void testSet(Instruction i, ref LuaVM vm)
         {
             var abc = i.ABC();
             var a = abc.Item1 + 1;

@@ -1,7 +1,7 @@
 using System;
 using luacsharp.vm;
-using LuaVm = luacsharp.API.LuaState;
-namespace luacsharp.Opcodes
+using LuaVM = luacsharp.state.LuaState;
+namespace luacsharp.vm
 {
     internal struct opcode
     {
@@ -25,7 +25,7 @@ namespace luacsharp.Opcodes
         }
     }
     
-    delegate void Action(Instruction i, LuaVm vm);
+    delegate void Action(Instruction i, ref LuaVM vm);
     
     public static class OpCodes
     {
@@ -102,7 +102,7 @@ namespace luacsharp.Opcodes
             new opcode(0, 0, OpArgU, OpArgN, IABC /* */, "SETUPVAL", null), // UpValue[B] := R(A)
             new opcode(0, 0, OpArgK, OpArgK, IABC /* */, "SETTABLE", InscTable.setTable), // R(A)[RK(B)] := RK(C)
             new opcode(0, 1, OpArgU, OpArgU, IABC /* */, "NEWTABLE", InscTable.newTable), // R(A) := {} (size = B,C)
-            new opcode(0, 1, OpArgR, OpArgK, IABC /* */, "SELF    ", null), // R(A+1) := R(B); R(A) := R(B)[RK(C)]
+            new opcode(0, 1, OpArgR, OpArgK, IABC /* */, "SELF    ", InscCall.self), // R(A+1) := R(B); R(A) := R(B)[RK(C)]
             new opcode(0, 1, OpArgK, OpArgK, IABC /* */, "ADD     ", InscOperators.add), // R(A) := RK(B) + RK(C)
             new opcode(0, 1, OpArgK, OpArgK, IABC /* */, "SUB     ", InscOperators.sub), // R(A) := RK(B) - RK(C)
             new opcode(0, 1, OpArgK, OpArgK, IABC /* */, "MUL     ", InscOperators.mul), // R(A) := RK(B) * RK(C)
@@ -126,16 +126,16 @@ namespace luacsharp.Opcodes
             new opcode(1, 0, OpArgK, OpArgK, IABC, "LE      ", InscOperators.le),
             new opcode(1, 0, OpArgN, OpArgU, IABC, "TEST    ", InscOperators.test),
             new opcode(1, 1, OpArgR, OpArgU, IABC, "TESTSET ", InscOperators.testSet),
-            new opcode(0, 1, OpArgU, OpArgU, IABC /* */, "CALL    ", null),
-            new opcode(0, 1, OpArgU, OpArgU, IABC /* */, "TAILCALL", null), // return R(A)(R(A+1), ... ,R(A+B-1))
-            new opcode(0, 0, OpArgU, OpArgN, IABC /* */, "RETURN  ", null), // return R(A), ... ,R(A+B-2)
+            new opcode(0, 1, OpArgU, OpArgU, IABC /* */, "CALL    ", InscCall.call),
+            new opcode(0, 1, OpArgU, OpArgU, IABC /* */, "TAILCALL", InscCall.tailCall), // return R(A)(R(A+1), ... ,R(A+B-1))
+            new opcode(0, 0, OpArgU, OpArgN, IABC /* */, "RETURN  ", InscCall._return), // return R(A), ... ,R(A+B-2)
             new opcode(0, 1, OpArgR, OpArgN, IAsBx /**/, "FORLOOP ", InscFor.forLoop),
             new opcode(0, 1, OpArgR, OpArgN, IAsBx /**/, "FORPREP ", InscFor.forPrep), // R(A)-=R(A+2); pc+=sBx
             new opcode(0, 0, OpArgN, OpArgU, IABC /* */, "TFORCALL", null),
             new opcode(0, 1, OpArgR, OpArgN, IAsBx /**/, "TFORLOOP", null),
             new opcode(0, 0, OpArgU, OpArgU, IABC /* */, "SETLIST ", InscTable.setList),
-            new opcode(0, 1, OpArgU, OpArgN, IABx /* */, "CLOSURE ", null),
-            new opcode(0, 1, OpArgU, OpArgN, IABC /* */, "VARARG  ", null),
+            new opcode(0, 1, OpArgU, OpArgN, IABx /* */, "CLOSURE ", InscCall.closure),
+            new opcode(0, 1, OpArgU, OpArgN, IABC /* */, "VARARG  ", InscCall.vararg),
             new opcode(0, 0, OpArgU, OpArgU, IAx /*  */, "EXTRAARG", null),
         };
     }

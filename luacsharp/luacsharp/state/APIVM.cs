@@ -4,24 +4,24 @@ namespace luacsharp.state
     {
         public int PC()
         {
-            return pc;
+            return stack.pc;
         }
 
         public void AddPC(int n)
         {
-            pc += n;
+            stack.pc += n;
         }
 
         public uint Fetch()
         {
-            var i = proto.Code[pc];
-            pc++;
+            var i = stack.closure.proto.Code[stack.pc];
+            stack.pc++;
             return i;
         }
 
         public void GetConst(int idx)
         {
-            var c = proto.Constants[idx];
+            var c = stack.closure.proto.Constants[idx];
             stack.push(c);
         }
 
@@ -35,6 +35,29 @@ namespace luacsharp.state
             {
                 PushValue(rk + 1);
             }
+        }
+
+        public int RegisterCount()
+        {
+            return stack.closure.proto.MaxStackSize;
+        }
+
+        public void LoadVararg(int n)
+        {
+            if (n < 0)
+            {
+                n = stack.varargs.Length;
+            }
+
+            stack.check(n);
+            stack.pushN(stack.varargs, n);
+        }
+
+        public void LoadProto(int idx)
+        {
+            var proto = stack.closure.proto.Protos[idx];
+            var closure = Closure.newLuaClosure(ref proto);
+            stack.push(closure);
         }
     }
 }

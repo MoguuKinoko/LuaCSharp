@@ -14,7 +14,7 @@ namespace luacsharp.state
             }
             else if (new LuaValue(val).isLuaTable())
             {
-                var t = new LuaValue(val).toLuaTable();
+                var t = (LuaTable) new LuaValue(val).value;
                 stack.push((long) t.len());
             }
             else
@@ -45,6 +45,7 @@ namespace luacsharp.state
 
                     throw new Exception("concatenation error!");
                 }
+
                 // n==1, do nothing
             }
         }

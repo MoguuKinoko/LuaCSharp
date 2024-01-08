@@ -28,6 +28,7 @@ namespace luacsharp.state
             {
                 return Consts.LUA_TNONE;
             }
+
             var val = stack.get(idx);
             return new LuaValue(val).typeOf();
         }
@@ -75,6 +76,7 @@ namespace luacsharp.state
             return ConvertToBoolean(val);
         }
 
+
         private static bool ConvertToBoolean(object val)
         {
             if (val == null)
@@ -97,7 +99,7 @@ namespace luacsharp.state
         public Tuple<double, bool> ToNumberX(int idx)
         {
             var val = stack.get(idx);
-            return LuaValue.convertToFloat(val);
+            return LuaValue.convertToFloat(new LuaValue(val));
         }
 
         public Tuple<long, bool> ToIntegerX(int idx)
@@ -122,7 +124,7 @@ namespace luacsharp.state
             var val = stack.get(idx);
             switch (val.GetType().Name)
             {
-                case "String": return Tuple.Create((string)val, true);
+                case "String": return Tuple.Create(new LuaValue(val).toString(), true);
                 case "Int64":
                 case "Double":
                     var s = val;

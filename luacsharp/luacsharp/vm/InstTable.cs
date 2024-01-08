@@ -1,5 +1,5 @@
-using luacsharp.Opcodes;
-using LuaVm = luacsharp.API.LuaState;
+using luacsharp.vm;
+using LuaVM = luacsharp.state.LuaState;
 using ArithOp = System.Int32;
 using CompareOp = System.Int32;
 
@@ -7,7 +7,7 @@ namespace luacsharp.vm
 {
     public static class InscTable
     {
-        internal static void newTable(Instruction i, LuaVm vm)
+        internal static void newTable(Instruction i, ref LuaVM vm)
         {
             var abc = i.ABC();
             var a = abc.Item1;
@@ -18,7 +18,7 @@ namespace luacsharp.vm
             vm.Replace(a);
         }
 
-        internal static void getTable(Instruction i, LuaVm vm)
+        internal static void getTable(Instruction i, ref LuaVM vm)
         {
             var abc = i.ABC();
             var a = abc.Item1;
@@ -32,7 +32,7 @@ namespace luacsharp.vm
             vm.Replace(a);
         }
 
-        internal static void setTable(Instruction i, LuaVm vm)
+        internal static void setTable(Instruction i, ref LuaVM vm)
         {
             var abc = i.ABC();
             var a = abc.Item1;
@@ -46,14 +46,13 @@ namespace luacsharp.vm
             vm.SetTable(a);
         }
 
-        internal static void setList(Instruction i, LuaVm vm)
+        internal static void setList(Instruction i, ref LuaVM vm)
         {
             var abc = i.ABC();
-            var a = abc.Item1;
+            var a = abc.Item1 + 1;
             var b = abc.Item2;
             var c = abc.Item3;
 
-            a += 1;
             if (c > 0)
             {
                 c = c - 1;
@@ -63,12 +62,33 @@ namespace luacsharp.vm
                 c = new Instruction(vm.Fetch()).Ax();
             }
 
-            var idx = (long) c * LFIELDS_PER_FLUSH;
+            var bIsZero = b == 0;
+            if (bIsZero)
+            {
+                b = (int) vm.ToInteger(-1) - a - 1;
+                vm.Pop(1);
+            }
+
+            vm.CheckStack(1);
+            var idx = (long) (c * LFIELDS_PER_FLUSH);
             for (var j = 1; j <= b; j++)
             {
                 idx++;
                 vm.PushValue(a + j);
                 vm.SetI(a, idx);
+            }
+
+            if (bIsZero)
+            {
+                for (var j = vm.RegisterCount() + 1; j <= vm.GetTop(); j++)
+                {
+                    idx++;
+                    vm.PushValue(j);
+                    vm.SetI(a, idx);
+                }
+
+                // clear stack
+                vm.SetTop(vm.RegisterCount());
             }
         }
         

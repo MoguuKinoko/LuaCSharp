@@ -1,11 +1,11 @@
-using luacsharp.Opcodes;
-using LuaVm = luacsharp.API.LuaState;
+using luacsharp.vm;
+using LuaVM = luacsharp.state.LuaState;
 
 namespace luacsharp.vm
 {
     public class InscLoad
     {
-        internal static void loadNil(Instruction i, LuaVm vm)
+        internal static void loadNil(Instruction i, ref LuaVM vm)
         {
             var ab_ = i.AsBx();
             var a = ab_.Item1 + 1;
@@ -20,7 +20,7 @@ namespace luacsharp.vm
             vm.Pop(1);
         }
 
-        internal static void loadBool(Instruction i, LuaVm vm)
+        internal static void loadBool(Instruction i, ref LuaVM vm)
         {
             var abc = i.ABC();
             var a = abc.Item1 + 1;
@@ -35,7 +35,7 @@ namespace luacsharp.vm
             }
         }
 
-        internal static void loadK(Instruction i, LuaVm vm)
+        internal static void loadK(Instruction i, ref LuaVM vm)
         {
             var aBx = i.ABx();
             var a = aBx.Item1 + 1;
@@ -45,7 +45,7 @@ namespace luacsharp.vm
             vm.Replace(a);
         }
 
-        internal static void loadKx(Instruction i, LuaVm vm)
+        internal static void loadKx(Instruction i, ref LuaVM vm)
         {
             var aBx = i.ABx();
             var a = aBx.Item1 + 1;

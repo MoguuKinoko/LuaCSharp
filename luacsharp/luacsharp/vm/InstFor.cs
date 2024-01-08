@@ -1,12 +1,12 @@
 using luacsharp.API;
-using luacsharp.Opcodes;
-using LuaVm = luacsharp.API.LuaState;
+using luacsharp.vm;
+using LuaVM = luacsharp.state.LuaState;
 
 namespace luacsharp.vm
 {
     public class InscFor
     {
-        internal static void forPrep(Instruction i, LuaVm vm)
+        internal static void forPrep(Instruction i, ref LuaVM vm)
         {
             var asBx = i.AsBx();
             var a = asBx.Item1 + 1;
@@ -19,7 +19,7 @@ namespace luacsharp.vm
             vm.AddPC(sBx);
         }
 
-        internal static void forLoop(Instruction i, LuaVm vm)
+        internal static void forLoop(Instruction i, ref LuaVM vm)
         {
             var asBx = i.AsBx();
             var a = asBx.Item1 + 1;

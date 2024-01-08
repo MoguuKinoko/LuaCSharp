@@ -1,20 +1,21 @@
 using System;
-using luacsharp.Opcodes;
-using LuaVm = luacsharp.API.LuaState;
+using luacsharp.vm;
+using LuaVM = luacsharp.state.LuaState;
+
 
 namespace luacsharp.vm
 {
     public class InscMisc
     {
-        internal static void move(Instruction i, LuaVm vm)
+        internal static void move(Instruction i, ref LuaVM vm)
         {
             var ab_ = i.ABC();
             var a = ab_.Item1 + 1;
-            var b = ab_.Item2;
+            var b = ab_.Item2 + 1;
             vm.Copy(b, a);
         }
 
-        internal static void jmp(Instruction i, LuaVm vm)
+        internal static void jmp(Instruction i, ref LuaVM vm)
         {
             var asBx = i.AsBx();
             var a = asBx.Item1;

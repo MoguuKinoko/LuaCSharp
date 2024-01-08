@@ -7,6 +7,11 @@ namespace luacsharp.state
     {
         public bool Compare(int idx1, int idx2, CompareOp op)
         {
+            if (!stack.isValid(idx1) || !stack.isValid(idx2))
+            {
+                return false;
+            }
+
             var a = stack.get(idx1);
             var b = stack.get(idx2);
             switch (op)
@@ -23,6 +28,11 @@ namespace luacsharp.state
             if (a == null)
             {
                 return b == null;
+            }
+
+            if (b == null)
+            {
+                return false;
             }
 
             switch (a.GetType().Name)
@@ -45,16 +55,16 @@ namespace luacsharp.state
                     switch (b.GetType().Name)
                     {
                         case "Int64":
-                            return (long)a == (long)b;
+                            return (long) a == (long) b;
                         case "Double":
-                            return ((double)b).Equals((double)a);
+                            return ((double) b).Equals((double) a);
                         default: return false;
                     }
                 case "Double":
                     switch (b.GetType().Name)
                     {
                         case "Double": return a.Equals(b);
-                        case "Int64": return a.Equals((double)b);
+                        case "Int64": return a.Equals((double) b);
                         default: return false;
                     }
                 default: return a == b;
@@ -68,23 +78,23 @@ namespace luacsharp.state
                 case "String":
                     if (b.GetType().Name.Equals("String"))
                     {
-                        return String.Compare(((string)a), (string)b, StringComparison.Ordinal) == -1;
+                        return String.Compare(((string) a), (string) b, StringComparison.Ordinal) == -1;
                     }
 
                     break;
                 case "Int64":
                     switch (b.GetType().Name)
                     {
-                        case "Int64": return (long)a < (long)b;
-                        case "Double": return (double)a < (double)b;
+                        case "Int64": return (long) a < (long) b;
+                        case "Double": return (double) a < (double) b;
                     }
 
                     break;
                 case "Double":
                     switch (b.GetType().Name)
                     {
-                        case "Double": return (double)a < (double)b;
-                        case "Int64": return (double)a < (double)b;
+                        case "Double": return (double) a < (double) b;
+                        case "Int64": return (double) a < (double) b;
                     }
 
                     break;
@@ -100,14 +110,14 @@ namespace luacsharp.state
                 case "String":
                     if (b.GetType().Name.Equals("String"))
                     {
-                        return string.CompareOrdinal((string)a, (string)b) <= 0;
+                        return string.CompareOrdinal((string) a, (string) b) <= 0;
                     }
 
                     break;
                 case "Int64":
                     switch (b.GetType().Name)
                     {
-                        case "Int64": return (long)a <= (long)b;
+                        case "Int64": return (long) a <= (long) b;
                         case "Double": return Convert.ToDouble(a) <= Convert.ToDouble(b);
                     }
 
@@ -115,7 +125,7 @@ namespace luacsharp.state
                 case "Double":
                     switch (b.GetType().Name)
                     {
-                        case "Double": return (double)a <= (double)b;
+                        case "Double": return (double) a <= (double) b;
                         case "Int64": return Convert.ToDouble(a) <= Convert.ToDouble(b);
                     }
 

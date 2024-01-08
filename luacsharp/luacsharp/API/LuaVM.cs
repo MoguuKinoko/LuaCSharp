@@ -1,4 +1,4 @@
-using luacsharp.BinaryChunk;
+using luacsharp.binchunk;
 
 namespace luacsharp.API
 {
@@ -9,7 +9,8 @@ namespace luacsharp.API
         uint Fetch();
         void GetConst(int idx);
         void GetRK(int rk);
-        LuaState New(int stackSize, Prototype proto);
-        LuaState New();
+        int RegisterCount();
+        void LoadVararg(int n);
+        void LoadProto(int idx);
     }
 }

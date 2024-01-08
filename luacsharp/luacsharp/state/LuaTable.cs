@@ -10,7 +10,7 @@ namespace luacsharp.state
     {
         private LuaValue[] arr;
         private Dictionary<object, LuaValue> _map;
-        
+
         public static LuaTable newLuaTable(int nArr, int nRec)
         {
             var t = new LuaTable();
@@ -26,7 +26,7 @@ namespace luacsharp.state
 
             return t;
         }
-        
+
         public LuaValue get(LuaValue key)
         {
             key = _floatToInteger(key);
@@ -68,7 +68,7 @@ namespace luacsharp.state
         {
             for (var idx = arr.Length + 1; true; idx++)
             {
-                if (_map.ContainsKey(idx))
+                if (_map != null && _map.ContainsKey(idx))
                 {
                     var val = _map.Values.ElementAt(idx);
                     _map.Remove(idx);
@@ -107,7 +107,7 @@ namespace luacsharp.state
                 var idx = key.toInteger();
                 if (idx >= 1)
                 {
-                    var arrLen = arr.Length;
+                    var arrLen = arr?.Length ?? 0;
                     if (idx <= arrLen)
                     {
                         arr[idx - 1] = val;
@@ -121,13 +121,23 @@ namespace luacsharp.state
 
                     if (idx == arrLen + 1)
                     {
-                        _map.Remove(idx);
+                        _map?.Remove(idx);
+
                         if (val != null)
                         {
-                            var b = arr.ToList();
-                            b.Add(val);
-                            arr = b.ToArray();
-                            _expandArray();
+                            if (arr == null)
+                            {
+                                var b = new List<LuaValue> {val};
+                                arr = b.ToArray();
+                                _expandArray();
+                            }
+                            else
+                            {
+                                var b = arr.ToList();
+                                b.Add(val);
+                                arr = b.ToArray();
+                                _expandArray();
+                            }
                         }
 
                         return;

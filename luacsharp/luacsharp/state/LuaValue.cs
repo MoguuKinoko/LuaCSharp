@@ -12,15 +12,15 @@ namespace luacsharp.state
         {
             this.value = value;
         }
-        
-        public LuaTable toLuaTable()
-        {
-            return (LuaTable) value;
-        }
 
         public string toString()
         {
             return Convert.ToString(value);
+        }
+
+        public LuaValue toLuaValue()
+        {
+            return (LuaValue) (value);
         }
 
         public long toInteger()
@@ -38,8 +38,30 @@ namespace luacsharp.state
             return value.GetType().IsEquivalentTo(typeof(string));
         }
 
+        public bool isLuaValue()
+        {
+            return value.GetType().IsEquivalentTo(typeof(LuaValue));
+        }
+
+        public LuaTable toLuaTable()
+        {
+            if (isLuaValue())
+            {
+                var v = (LuaValue) value;
+                return v.toLuaTable();
+            }
+
+            return (LuaTable) value;
+        }
+
         public bool isLuaTable()
         {
+            if (isLuaValue())
+            {
+                var v = (LuaValue) value;
+                return v.isLuaTable();
+            }
+
             return value.GetType().IsEquivalentTo(typeof(LuaTable));
         }
 
@@ -52,14 +74,16 @@ namespace luacsharp.state
         {
             return value.GetType().IsEquivalentTo(typeof(long));
         }
-        
+
         internal LuaType typeOf()
         {
             if (value == null)
             {
                 return Consts.LUA_TNIL;
             }
-            
+
+            // Console.WriteLine("\n" + value.GetType().Name);
+
             switch (value.GetType().Name)
             {
                 case "Boolean": return Consts.LUA_TBOOLEAN;
@@ -67,17 +91,19 @@ namespace luacsharp.state
                 case "Int64": return Consts.LUA_TNUMBER;
                 case "String": return Consts.LUA_TSTRING;
                 case "LuaTable": return Consts.LUA_TTABLE;
-                default: throw new Exception("todo!");
+                case "Closure": return Consts.LUA_TFUNCTION;
             }
+
+            throw new Exception("todo!");
         }
-        
-        internal static Tuple<double, bool> convertToFloat(object val)
+
+        internal static Tuple<double, bool> convertToFloat(LuaValue luaValue)
         {
-            switch (val.GetType().Name)
+            switch (luaValue.value.GetType().Name)
             {
-                case "Double": return Tuple.Create((double) val, true);
-                case "Int64": return Tuple.Create(Convert.ToDouble(val), true);
-                case "String": return number.Parser.ParseFloat((string) val);
+                case "Double": return Tuple.Create(luaValue.toFloat(), true);
+                case "Int64": return Tuple.Create(luaValue.toFloat(), true);
+                case "String": return number.Parser.ParseFloat(Convert.ToString(luaValue.value));
                 default: return Tuple.Create(0d, false);
             }
         }
@@ -86,13 +112,13 @@ namespace luacsharp.state
         {
             switch (val.GetType().Name)
             {
-                case "Int64": return Tuple.Create<long, bool>((long) val, true);
+                case "Int64": return Tuple.Create((long) val, true);
                 case "Double": return number.Math.FloatToInteger((double) val);
                 case "String": return Tuple.Create(Convert.ToInt64(val), true);
                 default: return Tuple.Create(0L, false);
             }
         }
-        
+
         private Tuple<long, bool> _stringToInteger(string s)
         {
             var v = number.Parser.ParseInteger(s);
@@ -107,7 +133,7 @@ namespace luacsharp.state
                 return number.Math.FloatToInteger(v2.Item1);
             }
 
-            return Tuple.Create<long, bool>(0L, false);
+            return Tuple.Create(0L, false);
         }
     }
 }

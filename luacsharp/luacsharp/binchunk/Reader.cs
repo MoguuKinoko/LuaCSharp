@@ -3,12 +3,12 @@ using System.Linq;
 using System.Security.Permissions;
 using luacsharp.util;
 
-namespace luacsharp.BinaryChunk
+namespace luacsharp.binchunk
 {
-    public class Reader
+    internal class Reader
     {
-        internal byte[] data;
-        
+        public byte[] data;
+
         public byte readByte()
         {
             var b = data[0];
@@ -29,7 +29,17 @@ namespace luacsharp.BinaryChunk
             return BitConverter.ToUInt32(bytes, 0);
         }
 
-        ulong readUint64()
+        long readLuaInteger()
+        {
+            return (long) readUint64();
+        }
+
+        double readLuaNumber()
+        {
+            return BitConverter.Int64BitsToDouble((long) readUint64());
+        }
+
+        private ulong readUint64()
         {
             var bytes = new byte[8];
             Array.ConstrainedCopy(data, 0, bytes, 0, 8);
@@ -42,43 +52,17 @@ namespace luacsharp.BinaryChunk
             return BitConverter.ToUInt64(bytes, 0);
         }
 
-        long readLuaInteger()
-        {
-            return (long)readUint64();
-        }
-
-        double readLuaNumber()
-        {
-            return BitConverter.Int64BitsToDouble((long)readUint64());
-        }
-
-        string readString()
-        {
-            var size = (uint)readByte();
-            if (size == 0)
-            {
-                return "";
-            }
-
-            if (size == 0xFF)
-            {
-                size = (uint)readUint64();
-            }
-
-            var bytes = readBytes(size - 1);
-            return ConvertUtil.Bytes2String(bytes);
-        }
-
-        byte[] readBytes(uint n)
+        private byte[] readBytes(uint n)
         {
             var bytes = new byte[n];
-            Array.ConstrainedCopy(data, 0, bytes, 0, (int)n);
-            data = data.Skip((int)n).ToArray();
+            Array.ConstrainedCopy(data, 0, bytes, 0, (int) n);
+            data = data.Skip((int) n).ToArray();
             return bytes;
         }
 
-        internal void checkHeader()
+        public void checkHeader()
         {
+//            Console.WriteLine(Encoding.Default.GetString(readBytes(4)));
             if (ConvertUtil.Bytes2String(readBytes(4)) != BinaryChunk.LUA_SIGNATURE)
             {
                 Console.WriteLine("not a precompiled chunk!");
@@ -135,7 +119,7 @@ namespace luacsharp.BinaryChunk
                 Console.WriteLine("float format mismatch!");
             }
         }
-        
+
         public Prototype readProto(string parentSource)
         {
             var source = readString();
@@ -143,6 +127,7 @@ namespace luacsharp.BinaryChunk
             {
                 source = parentSource;
             }
+
             return new Prototype
             {
                 Source = source,
@@ -161,77 +146,17 @@ namespace luacsharp.BinaryChunk
             };
         }
 
-        uint[] readCode()
+        private string[] readUpvalueNames()
         {
-            var code = new uint[readUint32()];
-            for (int i = 0; i < code.Length; i++)
+            var names = new string[readUint32()];
+            for (var i = 0; i < names.Length; i++)
             {
-                code[i] = readUint32();
-            }
-            return code;
-        }
-
-        object readConstant()
-        {
-            switch (readByte())
-            {
-                case BinaryChunk.TAG_NIL: return null;
-                case BinaryChunk.TAG_BOOLEAN: return readByte() != 0;
-                case BinaryChunk.TAG_INTEGER: return readLuaInteger();
-                case BinaryChunk.TAG_NUMBER: return readLuaNumber();
-                case BinaryChunk.TAG_SHORT_STR: return readString();
-                case BinaryChunk.TAG_LONG_STR: return readString();
-                default: 
-                    throw new Exception("corrupted!");
-            }
-        }
-
-        object[] readConstants()
-        {
-            var constants = new object[readUint32()];
-            for (var i = 0; i < constants.Length; i++)
-            {
-                constants[i] = readConstant();
-            }
-            return constants;
-        }
-        
-        Upvalue[] readUpvalues()
-        {
-            var upvalues = new Upvalue[readUint32()];
-            for (var i = 0; i < upvalues.Length; i++)
-            {
-                upvalues[i] = new Upvalue
-                {
-                    Instack = readByte(),
-                    Idx = readByte()
-                };
+                names[i] = readString();
             }
 
-            return upvalues;
+            return names;
         }
-        
-        Prototype[] readProtos(string parentSource)
-        {
-            var protos = new Prototype[readUint32()];
-            for (var i = 0; i < protos.Length; i++)
-            {
-                protos[i] = readProto(parentSource);
-            }
-            return protos;
-        }
-        
-        uint[] readLineInfo()
-        {
-            var lineInfo = new uint[readUint32()];
-            for (var i = 0; i < lineInfo.Length; i++)
-            {
-                lineInfo[i] = readUint32();
-            }
 
-            return lineInfo;
-        }
-        
         private LocVar[] readLocVars()
         {
             var locVars = new LocVar[readUint32()];
@@ -247,16 +172,95 @@ namespace luacsharp.BinaryChunk
 
             return locVars;
         }
-        
-        private string[] readUpvalueNames()
+
+        private uint[] readLineInfo()
         {
-            var names = new string[readUint32()];
-            for (var i = 0; i < names.Length; i++)
+            var lineInfo = new uint[readUint32()];
+            for (var i = 0; i < lineInfo.Length; i++)
             {
-                names[i] = readString();
+                lineInfo[i] = readUint32();
             }
 
-            return names;
+            return lineInfo;
+        }
+
+        private Prototype[] readProtos(string parentSource)
+        {
+            var protos = new Prototype[readUint32()];
+            for (var i = 0; i < protos.Length; i++)
+            {
+                protos[i] = readProto(parentSource);
+            }
+
+            return protos;
+        }
+
+        private Upvalue[] readUpvalues()
+        {
+            var upvalues = new Upvalue[readUint32()];
+            for (var i = 0; i < upvalues.Length; i++)
+            {
+                upvalues[i] = new Upvalue
+                {
+                    Instack = readByte(),
+                    Idx = readByte()
+                };
+            }
+
+            return upvalues;
+        }
+
+        private object[] readConstants()
+        {
+            var constants = new object[readUint32()];
+            for (var i = 0; i < constants.Length; i++)
+            {
+                constants[i] = readConstant();
+            }
+
+            return constants;
+        }
+
+        private object readConstant()
+        {
+            switch (readByte())
+            {
+                case BinaryChunk.TAG_NIL: return null;
+                case BinaryChunk.TAG_BOOLEAN: return readByte() != 0;
+                case BinaryChunk.TAG_INTEGER: return readLuaInteger();
+                case BinaryChunk.TAG_NUMBER: return readLuaNumber();
+                case BinaryChunk.TAG_SHORT_STR: return readString();
+                case BinaryChunk.TAG_LONG_STR: return readString();
+                default: throw new Exception("corrupted!");
+            }
+        }
+
+        private uint[] readCode()
+        {
+            var code = new uint[readUint32()];
+            for (var i = 0; i < code.Length; i++)
+            {
+                code[i] = readUint32();
+            }
+
+            return code;
+        }
+
+        private string readString()
+        {
+            var size = (uint) readByte();
+            if (size == 0)
+            {
+                return "";
+            }
+
+            if (size == 0xFF)
+            {
+                size = (uint) readUint64();
+            }
+
+            var bytes = readBytes(size - 1);
+            return ConvertUtil.Bytes2String(bytes);
         }
     }
 }

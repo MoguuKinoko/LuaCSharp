@@ -9,7 +9,7 @@
         <AppDesignerFolder>Properties</AppDesignerFolder>
         <RootNamespace>luacsharp</RootNamespace>
         <AssemblyName>luacsharp</AssemblyName>
-        <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+        <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
         <LangVersion>8</LangVersion>
     </PropertyGroup>
@@ -45,28 +45,32 @@
         <Compile Include="API\LuaState.cs" />
         <Compile Include="number\Math.cs" />
         <Compile Include="number\Parser.cs" />
-        <Compile Include="opcodes\Instruction.cs" />
-        <Compile Include="opcodes\OpCodes.cs" />
         <Compile Include="program.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="state\APIAccess.cs" />
         <Compile Include="state\APIArith.cs" />
+        <Compile Include="state\APICall.cs" />
         <Compile Include="state\APICompare.cs" />
         <Compile Include="state\APIGet.cs" />
         <Compile Include="state\APIMisc.cs" />
+        <Compile Include="state\APIPush.cs" />
         <Compile Include="state\APISet.cs" />
         <Compile Include="state\APIVM.cs" />
+        <Compile Include="state\Closure.cs" />
         <Compile Include="state\LuaStack.cs" />
         <Compile Include="state\LuaState.cs" />
         <Compile Include="state\LuaTable.cs" />
         <Compile Include="state\LuaValue.cs" />
         <Compile Include="util\ConvertUtil.cs" />
         <Compile Include="vm\Fpb.cs" />
-        <Compile Include="vm\InscFor.cs" />
-        <Compile Include="vm\InscLoad.cs" />
-        <Compile Include="vm\InscMisc.cs" />
+        <Compile Include="vm\InstCall.cs" />
+        <Compile Include="vm\InstFor.cs" />
+        <Compile Include="vm\InstLoad.cs" />
+        <Compile Include="vm\InstMisc.cs" />
         <Compile Include="vm\InscOperators.cs" />
-        <Compile Include="vm\InscTable.cs" />
+        <Compile Include="vm\InstTable.cs" />
+        <Compile Include="vm\Instruction.cs" />
+        <Compile Include="vm\OpCodes.cs" />
     </ItemGroup>
     <ItemGroup>
       <Content Include="lua\hello_world.lua" />
@@ -83,6 +87,9 @@
         <Isolated>False</Isolated>
         <EmbedInteropTypes>True</EmbedInteropTypes>
       </COMReference>
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="opcodes" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

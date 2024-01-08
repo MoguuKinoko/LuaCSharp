@@ -5,3 +5,10 @@ D:\LuaCSharp\luacsharp\luacsharp\obj\Debug\luacsharp.csproj.ResolveComReference.
 D:\LuaCSharp\luacsharp\luacsharp\obj\Debug\luacsharp.csproj.CoreCompileInputs.cache
 D:\LuaCSharp\luacsharp\luacsharp\obj\Debug\luacsharp.dll
 D:\LuaCSharp\luacsharp\luacsharp\obj\Debug\luacsharp.pdb
+E:\LuaCSharp\luacsharp\luacsharp\bin\Debug\luacsharp.dll
+E:\LuaCSharp\luacsharp\luacsharp\bin\Debug\luacsharp.pdb
+E:\LuaCSharp\luacsharp\luacsharp\obj\Debug\luacsharp.csproj.AssemblyReference.cache
+E:\LuaCSharp\luacsharp\luacsharp\obj\Debug\luacsharp.csproj.ResolveComReference.cache
+E:\LuaCSharp\luacsharp\luacsharp\obj\Debug\luacsharp.csproj.CoreCompileInputs.cache
+E:\LuaCSharp\luacsharp\luacsharp\obj\Debug\luacsharp.dll
+E:\LuaCSharp\luacsharp\luacsharp\obj\Debug\luacsharp.pdb
