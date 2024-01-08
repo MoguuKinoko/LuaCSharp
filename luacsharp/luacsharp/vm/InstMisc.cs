@@ -5,7 +5,7 @@ using LuaVM = luacsharp.state.LuaState;
 
 namespace luacsharp.vm
 {
-    public class InscMisc
+    public class InstMisc
     {
         internal static void move(Instruction i, ref LuaVM vm)
         {

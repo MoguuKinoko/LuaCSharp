@@ -4,7 +4,7 @@ using LuaVM = luacsharp.state.LuaState;
 
 namespace luacsharp.vm
 {
-    public class InscFor
+    public class InstFor
     {
         internal static void forPrep(Instruction i, ref LuaVM vm)
         {

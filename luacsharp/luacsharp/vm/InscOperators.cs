@@ -7,7 +7,7 @@ using CompareOp = System.Int32;
 
 namespace luacsharp.vm
 {
-    public class InscOperators
+    public class InstOperators
     {
         private static void _binaryArith(Instruction i, LuaVM vm, ArithOp op)
         {

@@ -5,7 +5,7 @@ using CompareOp = System.Int32;
 
 namespace luacsharp.vm
 {
-    public static class InscTable
+    public static class InstTable
     {
         internal static void newTable(Instruction i, ref LuaVM vm)
         {

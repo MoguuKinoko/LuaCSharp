@@ -3,7 +3,7 @@ using LuaVM = luacsharp.state.LuaState;
 
 namespace luacsharp.vm
 {
-    public class InscLoad
+    public class InstLoad
     {
         internal static void loadNil(Instruction i, ref LuaVM vm)
         {

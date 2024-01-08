@@ -3,7 +3,7 @@ using luacsharp.vm;
 using LuaVM = luacsharp.state.LuaState;
 namespace luacsharp.vm
 {
-    public class InscCall
+    public class InstCall
     {
         // R(A) := closure(KPROTO[Bx])
         internal static void closure(Instruction i, ref LuaVM vm)
