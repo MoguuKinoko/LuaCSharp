@@ -1,19 +1,50 @@
+using System;
 using LuaVM = luacsharp.state.LuaState;
 namespace luacsharp.vm
 {
     public class InstUpvalue
     {
+        internal static void getUpval(Instruction i, ref LuaVM vm)
+        {
+            var (a, b, _) = i.ABC();
+            a += 1;
+            b += 1;
+
+            vm.Copy(LuaVM.LuaUpvalueIndex(b), a);
+        }
+
+
+        // UpValue[B] := R(A)
+        internal static void setUpval(Instruction i, ref LuaVM vm)
+        {
+            var (a, b, _) = i.ABC();
+            a += 1;
+            b += 1;
+
+            vm.Copy(a, LuaVM.LuaUpvalueIndex(b));
+        }
+
+        // R(A) := UpValue[B][RK(C)]
         internal static void getTabUp(Instruction i, ref LuaVM vm)
         {
-            var a_c = i.ABC();
-            var a = a_c.Item1 + 1;
-            var c = a_c.Item3;
+            var (a, b, c ) = i.ABC();
+            a += 1;
+            b += 1;
 
-            vm.PushGlobalTable();
             vm.GetRK(c);
-            vm.GetTable(-2);
+            vm.GetTable(LuaVM.LuaUpvalueIndex(b));
             vm.Replace(a);
-            vm.Pop(1);
+        }
+
+        // UpValue[A][RK(B)] := RK(C)
+        internal static void setTabUp(Instruction i, ref LuaVM vm)
+        {
+            var ( a, b, c) = i.ABC();
+            a += 1;
+
+            vm.GetRK(b);
+            vm.GetRK(c);
+            vm.SetTable(LuaVM.LuaUpvalueIndex(a));
         }
     }
 }

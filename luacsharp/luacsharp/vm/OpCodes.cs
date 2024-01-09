@@ -95,11 +95,11 @@ namespace luacsharp.vm
             new opcode(0, 1, OpArgN, OpArgN, IABx, "LOADKX  ", InstLoad.loadKx), // R(A) := Kst(extra arg)
             new opcode(0, 1, OpArgU, OpArgU, IABC, "LOADBOOL", InstLoad.loadBool), // R(A) := (bool)B; if (C) pc++
             new opcode(0, 1, OpArgU, OpArgN, IABC, "LOADNIL ", InstLoad.loadNil), // R(A), R(A+1), ..., R(A+B) := nil
-            new opcode(0, 1, OpArgU, OpArgN, IABC, "GETUPVAL", null), // R(A) := UpValue[B]
+            new opcode(0, 1, OpArgU, OpArgN, IABC, "GETUPVAL", InstUpvalue.getUpval), // R(A) := UpValue[B]
             new opcode(0, 1, OpArgU, OpArgK, IABC, "GETTABUP", InstUpvalue.getTabUp), // R(A) := UpValue[B][RK(C)]
             new opcode(0, 1, OpArgR, OpArgK, IABC /* */, "GETTABLE", InstTable.getTable), // R(A) := R(B)[RK(C)]
-            new opcode(0, 0, OpArgK, OpArgK, IABC /* */, "SETTABUP", null), // UpValue[A][RK(B)] := RK(C)
-            new opcode(0, 0, OpArgU, OpArgN, IABC /* */, "SETUPVAL", null), // UpValue[B] := R(A)
+            new opcode(0, 0, OpArgK, OpArgK, IABC /* */, "SETTABUP", InstUpvalue.setTabUp), // UpValue[A][RK(B)] := RK(C)
+            new opcode(0, 0, OpArgU, OpArgN, IABC /* */, "SETUPVAL", InstUpvalue.setUpval), // UpValue[B] := R(A)
             new opcode(0, 0, OpArgK, OpArgK, IABC /* */, "SETTABLE", InstTable.setTable), // R(A)[RK(B)] := RK(C)
             new opcode(0, 1, OpArgU, OpArgU, IABC /* */, "NEWTABLE", InstTable.newTable), // R(A) := {} (size = B,C)
             new opcode(0, 1, OpArgR, OpArgK, IABC /* */, "SELF    ", InstCall.self), // R(A+1) := R(B); R(A) := R(B)[RK(C)]

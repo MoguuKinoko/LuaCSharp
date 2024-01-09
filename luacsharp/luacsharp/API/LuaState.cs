@@ -71,6 +71,7 @@ namespace luacsharp.API
         LuaType GetGlobal(string name);
         void SetGlobal(string name);
         void Register(string name, CsharpFunction f);
+        void PushCsharpClosure(CsharpFunction f, int n);
 
     }
 }

@@ -1,4 +1,5 @@
 using luacsharp.API;
+// using luacsharp.binchunk;
 
 namespace luacsharp.state
 {
@@ -31,13 +32,23 @@ namespace luacsharp.state
 
         public void PushCsharpFunction(CsharpFunction f)
         {
-            stack.push(Closure.newCsharpClosure(f));
+            stack.push(Closure.newCsharpClosure(f, 0));
         }
 
         public void PushGlobalTable()
         {
             var global = registry.get(Consts.LUA_RIDX_GLOBALS);
             stack.push(global);
+        }
+
+        public void PushCsharpClosure(CsharpFunction f, int n)
+        {
+            var closure = Closure.newCsharpClosure(f, n);
+            for (var i = n; i > 0; i--)
+            {
+                var val = stack.pop();
+                closure.upvals[n - 1] = new Upvalue { val = val };
+            }
         }
     }
 }

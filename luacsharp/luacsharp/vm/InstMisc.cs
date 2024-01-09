@@ -17,14 +17,12 @@ namespace luacsharp.vm
 
         internal static void jmp(Instruction i, ref LuaVM vm)
         {
-            var asBx = i.AsBx();
-            var a = asBx.Item1;
-            var sBx = asBx.Item2;
-            
+            var (a, sBx ) = i.AsBx();
+
             vm.AddPC(sBx);
-            if (a != 0)
-            {
-                throw new Exception("todo!");
+            if (a != 0 )
+            { 
+                vm.CloseUpvalues(a);
             }
         }
     }

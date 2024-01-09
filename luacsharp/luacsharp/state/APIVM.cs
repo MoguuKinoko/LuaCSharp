@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace luacsharp.state
 {
     public partial struct LuaState
@@ -55,9 +57,51 @@ namespace luacsharp.state
 
         public void LoadProto(int idx)
         {
-            var proto = stack.closure.proto.Protos[idx];
-            var closure = Closure.newLuaClosure(ref proto);
+            var subProto = stack.closure.proto.Protos[idx];
+            var closure = Closure.newLuaClosure(subProto);
             stack.push(closure);
+            for (var i = 0; i < subProto.Upvalues.Length; i++)
+            {
+                var uvInfo = subProto.Upvalues[i];
+                var uvIdx = (int) uvInfo.Idx;
+                if (uvInfo.Instack == 1)
+                {
+                    if (stack.openuvs == null)
+                    {
+                        stack.openuvs = new Dictionary<int, Upvalue>();
+                    }
+
+                    if (stack.openuvs.ContainsKey(uvIdx))
+                    {
+                        var openuv = stack.openuvs[uvIdx];
+                        closure.upvals[i] = openuv;
+                    }
+                    else
+                    {
+                        closure.upvals[i] = new Upvalue {val = stack.slots[uvIdx]};
+                        stack.openuvs[uvIdx] = closure.upvals[i];
+                    }
+                }
+                else
+                {
+                    closure.upvals[i] = stack.closure.upvals[uvIdx];
+                }
+            }
         }
+        
+        public void CloseUpvalues(int a)
+        {
+            for (var i = 0; i < stack.openuvs.Count; i++)
+            {
+                if (i >= a - 1)
+                {  var openuv = stack.openuvs[i];
+                    var val= openuv.val;
+                    openuv.val = val;
+                    stack.openuvs.Remove(i);
+                }
+            }
+        }
+        
+        
     }
 }

@@ -130,5 +130,10 @@ namespace luacsharp.state
                 }
             }
         }
+        
+        public static int LuaUpvalueIndex(int i)
+        {
+            return Consts.LUA_REGISTRYINDEX - i;
+        }
     }
 }

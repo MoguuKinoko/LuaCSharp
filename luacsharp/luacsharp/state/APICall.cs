@@ -9,11 +9,20 @@ namespace luacsharp.state
 {
     public partial struct LuaState
     {
-          public int Load(ref byte[] chunk, string chunkName, string mode)
+        public int Load(ref byte[] chunk, string chunkName, string mode)
         {
             var proto = binchunk.BinaryChunk.Undump(chunk);
-            var c = Closure.newLuaClosure(ref proto);
+            var c = Closure.newLuaClosure(proto);
             stack.push(c);
+            if (proto.Upvalues.Length > 0)
+            {
+                var env = registry.get(Consts.LUA_RIDX_GLOBALS);
+                c.upvals[0] = new Upvalue
+                {
+                    val = env
+                };
+            }
+
             return 0;
         }
 

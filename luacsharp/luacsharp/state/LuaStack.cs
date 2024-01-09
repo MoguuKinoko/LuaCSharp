@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using luacsharp.API;
 
@@ -13,6 +14,7 @@ namespace luacsharp.state
         internal Closure closure;
         internal object[] varargs;
         internal int pc;
+        internal Dictionary<int, Upvalue> openuvs;
 
         internal static LuaStack newLuaStack(int size, LuaState state)
         {
@@ -64,20 +66,36 @@ namespace luacsharp.state
 
         internal bool isValid(int idx)
         {
-            if (idx == Consts.LUA_REGISTRYINDEX)
+            if (idx < Consts.LUA_REGISTRYINDEX)
             {
-                return true;
+                var uvIdx = Consts.LUA_REGISTRYINDEX - idx - 1;
+                var c = closure;
+                return c != null && (uvIdx < c.upvals.Length);
             }
+
             var absIdx = absIndex(idx);
             return absIdx > 0 && absIdx <= top;
         }
 
         internal object get(int idx)
         {
+            if (idx < Consts.LUA_REGISTRYINDEX)
+            {
+                var uvIdx = Consts.LUA_REGISTRYINDEX - idx - 1;
+                var c = closure;
+                if (c == null || uvIdx >= c.upvals.Length)
+                {
+                    return null;
+                }
+
+                return c.upvals[uvIdx].val;
+            }
+
             if (idx == Consts.LUA_REGISTRYINDEX)
             {
                 return state.registry;
             }
+
             var absIdx = absIndex(idx);
             if (absIdx > 0 && absIdx <= top)
             {
@@ -135,13 +153,23 @@ namespace luacsharp.state
 
         internal void set(int idx, object val)
         {
-            if (idx == Consts.LUA_REGISTRYINDEX)
+            if (idx < Consts.LUA_REGISTRYINDEX)
             {
-                state.registry = (LuaTable) val;
-                return;
+                var uvIdx = Consts.LUA_REGISTRYINDEX - idx - 1;
+                var c = closure;
+                if (c != null && uvIdx < c.upvals.Length)
+                {
+                    c.upvals[uvIdx].val = val;
+                    return;
+                }
             }
+
             var absIdx = absIndex(idx);
-            if (absIdx <= 0 || absIdx > top) throw new Exception("invalid index!");
+            if (absIdx <= 0 || absIdx > top)
+            {
+                throw new Exception("invalid index!");
+            }
+
             slots[absIdx - 1] = val;
         }
 
