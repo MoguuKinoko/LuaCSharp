@@ -1,4 +1,5 @@
 using System;
+using luacsharp.API;
 using LuaType = System.Int32;
 namespace luacsharp.state
 {
@@ -17,24 +18,24 @@ namespace luacsharp.state
 
         public int GetTable(int idx)
         {
-            var t = new LuaValue(stack.get(idx));
+            var t = stack.get(idx);
             var k = stack.pop();
-            return getTable(new LuaValue(t), new LuaValue(k));
+            return getTable(t, k);
         }
 
-        LuaType getTable(LuaValue t, LuaValue k)
+        LuaType getTable(object t, object k)
         {
-            if (t.isLuaTable())
+            if (LuaValue.isLuaTable(t))
             {
-                var tbl = t.toLuaTable();
-                var v = tbl.get(k).value;
+                var tbl = LuaValue.toLuaTable(t);
+                var v = tbl.get(k);
                 if (v.GetType().IsEquivalentTo(typeof(LuaValue)))
                 {
-                    v = ((LuaValue) v).value;
+                    v = ((LuaValue) v);
                 }
 
                 stack.push(v);
-                return new LuaValue(v).typeOf();
+                return LuaValue.typeOf(v);
             }
 
             throw new Exception("not a table!");
@@ -42,16 +43,22 @@ namespace luacsharp.state
 
         public LuaType GetField(int idx, string k)
         {
-            var t = new LuaValue(stack.get(idx));
-            return getTable(new LuaValue(t), new LuaValue(k));
+            var t = stack.get(idx);
+            return getTable(t, k);
 //            PushString(k);
 //            return GetTable(idx);
         }
 
         public LuaType GetI(int idx, long i)
         {
-            var t = new LuaValue(stack.get(idx));
-            return getTable(new LuaValue(t), new LuaValue(i));
+            var t = stack.get(idx);
+            return getTable(t, i);
+        }
+
+        public int GetGlobal(string name)
+        {
+            var t = registry.get(Consts.LUA_RIDX_GLOBALS);
+            return getTable(t, name);
         }
     }
 }

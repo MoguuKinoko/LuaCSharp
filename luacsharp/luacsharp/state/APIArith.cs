@@ -195,11 +195,11 @@ namespace luacsharp.state
 
         public void Arith(ArithOp op)
         {
-            LuaValue a;
-            var b = new LuaValue(stack.pop());
+            object a;
+            var b = stack.pop();
             if (op != Consts.LUA_OPUNM && op != Consts.LUA_OPBNOT)
             {
-                a = new LuaValue(stack.pop());
+                a = stack.pop();
             }
             else
             {
@@ -218,14 +218,14 @@ namespace luacsharp.state
             }
         }
 
-        object _arith(LuaValue a, LuaValue b, Operator op)
+        object _arith(object a, object b, Operator op)
         {
             if (op.floatFunc == null)
             {
-                Tuple<long, bool> v = LuaValue.convertToInteger(a);
+                var v = LuaValue.convertToInteger(a);
                 if (v.Item2)
                 {
-                    Tuple<long, bool> v2 = LuaValue.convertToInteger(b);
+                    var v2 = LuaValue.convertToInteger(b);
                     if (v2.Item2)
                     {
                         return op.integerFunc(v.Item1, v2.Item1);
@@ -236,10 +236,10 @@ namespace luacsharp.state
             {
                 if (op.integerFunc != null)
                 {
-                    if (a.isInteger() && b.isInteger())
+                    if (LuaValue.isInteger(a) && LuaValue.isInteger(b))
                     {
-                        var x = a.toInteger();
-                        var y = b.toInteger();
+                        var x = LuaValue.toInteger(a);
+                        var y = LuaValue.toInteger(b);
                         return op.integerFunc(x, y);
                     }
                 }

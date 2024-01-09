@@ -32,5 +32,10 @@ namespace luacsharp.API
         public const int LUA_OPEQ = 0;
         public const int LUA_OPLT = 1;
         public const int LUA_OPLE = 2;
+        
+        public const int LUA_MINSTACK = 20;
+        public const int LUAI_MAXSTACK = 1000000;
+        public const int LUA_REGISTRYINDEX = -LUAI_MAXSTACK - 1000;
+        public const long LUA_RIDX_GLOBALS = 2;
     }
 }

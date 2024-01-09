@@ -6,76 +6,65 @@ namespace luacsharp.state
 {
     public class LuaValue
     {
-        internal readonly object value;
+        // internal readonly object value;
+        //
+        // public LuaValue(object value)
+        // {
+        //     this.value = value;
+        // }
 
-        public LuaValue(object value)
-        {
-            this.value = value;
-        }
-
-        public string toString()
+        public static string toString(object value)
         {
             return Convert.ToString(value);
         }
 
-        public LuaValue toLuaValue()
-        {
-            return (LuaValue) (value);
-        }
+//        public LuaValue toLuaValue()
+//        {
+//            return (LuaValue) (value);
+//        }
 
-        public long toInteger()
+        public static long toInteger(object value)
         {
             return Convert.ToInt64(value);
         }
 
-        public double toFloat()
+
+        public static double toFloat(object value)
         {
             return Convert.ToDouble(value);
         }
 
-        public bool isString()
+        public static bool isString(object value)
         {
             return value.GetType().IsEquivalentTo(typeof(string));
         }
 
-        public bool isLuaValue()
+        public static bool isLuaValue(object value)
         {
             return value.GetType().IsEquivalentTo(typeof(LuaValue));
         }
 
-        public LuaTable toLuaTable()
+        public static LuaTable toLuaTable(object value)
         {
-            if (isLuaValue())
-            {
-                var v = (LuaValue) value;
-                return v.toLuaTable();
-            }
-
             return (LuaTable) value;
         }
 
-        public bool isLuaTable()
+        public static bool isLuaTable(object value)
         {
-            if (isLuaValue())
-            {
-                var v = (LuaValue) value;
-                return v.isLuaTable();
-            }
-
             return value.GetType().IsEquivalentTo(typeof(LuaTable));
         }
 
-        public bool isFloat()
+        public static bool isFloat(object value)
         {
             return value.GetType().IsEquivalentTo(typeof(double));
         }
 
-        public bool isInteger()
+        public static bool isInteger(object value)
         {
             return value.GetType().IsEquivalentTo(typeof(long));
         }
 
-        internal LuaType typeOf()
+        internal static LuaType typeOf(object value)
         {
             if (value == null)
             {
@@ -97,34 +86,34 @@ namespace luacsharp.state
             throw new Exception("todo!");
         }
 
-        internal static Tuple<double, bool> convertToFloat(LuaValue luaValue)
+        internal static (double, bool) convertToFloat(object value)
         {
-            switch (luaValue.value.GetType().Name)
+            switch (value.GetType().Name)
             {
-                case "Double": return Tuple.Create(luaValue.toFloat(), true);
-                case "Int64": return Tuple.Create(luaValue.toFloat(), true);
-                case "String": return number.Parser.ParseFloat(Convert.ToString(luaValue.value));
-                default: return Tuple.Create(0d, false);
+                case "Double": return (toFloat(value), true);
+                case "Int64": return (toFloat(value), true);
+                case "String": return number.Parser.ParseFloat(toString(value));
+                default: return (0d, false);
             }
         }
 
-        internal static Tuple<long, bool> convertToInteger(object val)
+        internal static (long, bool) convertToInteger(object val)
         {
             switch (val.GetType().Name)
             {
-                case "Int64": return Tuple.Create((long) val, true);
+                case "Int64": return ((long) val, true);
                 case "Double": return number.Math.FloatToInteger((double) val);
-                case "String": return Tuple.Create(Convert.ToInt64(val), true);
-                default: return Tuple.Create(0L, false);
+                case "String": return (Convert.ToInt64(val), true);
+                default: return (0L, false);
             }
         }
 
-        private Tuple<long, bool> _stringToInteger(string s)
+        private (long, bool) _stringToInteger(string s)
         {
             var v = number.Parser.ParseInteger(s);
             if (v.Item2)
             {
-                return Tuple.Create(v.Item1, true);
+                return (v.Item1, true);
             }
 
             var v2 = number.Parser.ParseFloat(s);
@@ -133,7 +122,7 @@ namespace luacsharp.state
                 return number.Math.FloatToInteger(v2.Item1);
             }
 
-            return Tuple.Create(0L, false);
+            return (0L, false);
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using luacsharp.API;
 
 namespace luacsharp.state
 {
@@ -8,15 +9,15 @@ namespace luacsharp.state
         {
             var v = stack.pop();
             var k = stack.pop();
-            setTable(idx, new LuaValue(k), new LuaValue(v));
+            setTable(idx, k, v);
         }
 
-        void setTable(int idx, LuaValue k, LuaValue v)
+        void setTable(int idx, object k, object v)
         {
-            var t = new LuaValue(stack.get(idx));
-            if (t.isLuaTable())
+            var t = stack.get(idx);
+            if (LuaValue.isLuaTable(t))
             {
-                var table = t.toLuaTable();
+                var table = LuaValue.toLuaTable(t);
                 table.put(k, v);
                 stack.set(idx, table);
                 return;
@@ -28,13 +29,42 @@ namespace luacsharp.state
         public void SetField(int idx, string k)
         {
             var v = stack.pop();
-            setTable(idx, new LuaValue(k), new LuaValue(v));
+            setTable(idx, k, v);
         }
 
         public void SetI(int idx, long n)
         {
             var v = stack.pop();
-            setTable(idx, new LuaValue(n), new LuaValue(v));
+            setTable(idx, n, v);
+        }
+
+        public void SetGlobal(string name)
+        {
+            var t = registry.get(Consts.LUA_RIDX_GLOBALS);
+            var v = stack.pop();
+            setTable(ref t, name, v);
+            registry.put(Consts.LUA_RIDX_GLOBALS, t);
+        }
+
+
+        // t[k]=v
+        void setTable(ref object t, object k, object v)
+        {
+            if (LuaValue.isLuaTable(t))
+            {
+                var tbl = LuaValue.toLuaTable(t);
+                tbl.put(k, v);
+                t = tbl;
+                return;
+            }
+
+            throw new Exception("not a table!");
+        }
+
+        public void Register(string name, CsharpFunction f)
+        {
+            PushCsharpFunction(f);
+            SetGlobal(name);
         }
     }
 }

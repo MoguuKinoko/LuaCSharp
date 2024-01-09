@@ -1,4 +1,5 @@
 using System;
+using luacsharp.API;
 using luacsharp.binchunk;
 
 namespace luacsharp.state
@@ -6,13 +7,18 @@ namespace luacsharp.state
     public partial struct LuaState : API.LuaState
     {
         public LuaStack stack;
+        public LuaTable registry;
 
-        public static API.LuaState New(int stackSize)
+        public static API.LuaState New()
         {
-            return new LuaState
+            var registry = LuaTable.newLuaTable(0, 0);
+            registry.put(Consts.LUA_RIDX_GLOBALS, LuaTable.newLuaTable(0, 0));
+            var ls = new LuaState
             {
-                stack = LuaStack.newLuaStack(stackSize)
+                registry = registry,
             };
+            ls.pushLuaStack(LuaStack.newLuaStack(Consts.LUA_MINSTACK, ls));
+            return ls;
         }
 
 

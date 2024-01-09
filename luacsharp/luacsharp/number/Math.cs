@@ -49,10 +49,10 @@ namespace luacsharp.number
             return ShiftLeft(a, -n);
         }
 
-        internal static Tuple<long, bool> FloatToInteger(double f)
+        internal static (long, bool) FloatToInteger(double f)
         {
             var i = (long) f;
-            return Tuple.Create(i, System.Math.Abs(i - f) <= 0);
+            return (i, System.Math.Abs(i - f) <= 0);
         }
     }
 }

@@ -1,23 +1,26 @@
 using System;
 using System.Linq;
+using luacsharp.API;
 
 namespace luacsharp.state
 {
     public class LuaStack
     {
         public object[] slots;
+        internal LuaState state;
         internal int top;
         internal LuaStack prev;
         internal Closure closure;
         internal object[] varargs;
         internal int pc;
 
-        internal static LuaStack newLuaStack(int size)
+        internal static LuaStack newLuaStack(int size, LuaState state)
         {
             return new LuaStack
             {
                 slots = new object[size],
-                top = 0
+                top = 0,
+                state = state
             };
         }
 
@@ -47,6 +50,10 @@ namespace luacsharp.state
 
         internal int absIndex(int idx)
         {
+            if (idx <= Consts.LUA_REGISTRYINDEX)
+            {
+                return idx;
+            }
             if (idx > 0)
             {
                 return idx;
@@ -57,12 +64,20 @@ namespace luacsharp.state
 
         internal bool isValid(int idx)
         {
+            if (idx == Consts.LUA_REGISTRYINDEX)
+            {
+                return true;
+            }
             var absIdx = absIndex(idx);
             return absIdx > 0 && absIdx <= top;
         }
 
         internal object get(int idx)
         {
+            if (idx == Consts.LUA_REGISTRYINDEX)
+            {
+                return state.registry;
+            }
             var absIdx = absIndex(idx);
             if (absIdx > 0 && absIdx <= top)
             {
@@ -120,6 +135,11 @@ namespace luacsharp.state
 
         internal void set(int idx, object val)
         {
+            if (idx == Consts.LUA_REGISTRYINDEX)
+            {
+                state.registry = (LuaTable) val;
+                return;
+            }
             var absIdx = absIndex(idx);
             if (absIdx <= 0 || absIdx > top) throw new Exception("invalid index!");
             slots[absIdx - 1] = val;

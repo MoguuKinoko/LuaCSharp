@@ -22,7 +22,7 @@ namespace luacsharp.binchunk
         double luacNum;
     }
 
-    public struct Prototype
+    public class Prototype
     {
         internal string Source;
         internal uint LineDefined;

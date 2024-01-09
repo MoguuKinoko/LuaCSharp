@@ -1,3 +1,5 @@
+using luacsharp.API;
+
 namespace luacsharp.state
 {
     public partial struct LuaState
@@ -25,6 +27,17 @@ namespace luacsharp.state
         public void PushString(string s)
         {
             stack.push(s);
+        }
+
+        public void PushCsharpFunction(CsharpFunction f)
+        {
+            stack.push(Closure.newCsharpClosure(f));
+        }
+
+        public void PushGlobalTable()
+        {
+            var global = registry.get(Consts.LUA_RIDX_GLOBALS);
+            stack.push(global);
         }
     }
 }

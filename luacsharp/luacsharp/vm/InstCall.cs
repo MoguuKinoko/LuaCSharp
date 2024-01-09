@@ -31,7 +31,7 @@ namespace luacsharp.vm
         }
 
         static int _pushFuncAndArgs(int a, int b, ref LuaVM vm)
-        {
+        { 
             if (b >= 1)
             {
                 vm.CheckStack(b);

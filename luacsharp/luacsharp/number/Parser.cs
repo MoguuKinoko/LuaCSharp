@@ -17,16 +17,28 @@ namespace luacsharp.number
             }
         }
 
-        internal static Tuple<double, bool> ParseFloat(string str)
+        // internal static Tuple<double, bool> ParseFloat(string str)
+        // {
+        //     try
+        //     {
+        //         var i = Convert.ToDouble(str);
+        //         return Tuple.Create(i, true);
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         return Tuple.Create(0D, false);
+        //     }
+        // 
+        internal static (double, bool) ParseFloat(string str)
         {
             try
             {
                 var i = Convert.ToDouble(str);
-                return Tuple.Create(i, true);
+                return (i, true);
             }
             catch (Exception e)
             {
-                return Tuple.Create(0D, false);
+                return (0D, false);
             }
         }
     }

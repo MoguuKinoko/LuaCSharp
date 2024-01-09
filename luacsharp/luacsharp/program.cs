@@ -21,28 +21,6 @@ namespace luacsharp
             try
             {
                 string[] args = new string[] { "E:/luacsharp/luacsharp/luacsharp/lua/luac.out" };
-                // var fs = File.OpenRead(args[0]);
-                // var data = new byte[fs.Length];
-                // fs.Read(data, 0, data.Length);
-                // var proto = luacsharp.BinaryChunk.BinaryChunk.Undump(data);
-                // luaMain(proto);
-                // list(proto);
-
-                // var ls = new state.LuaState().New();
-                // ls.PushInteger(1);
-                // ls.PushString("2.0");
-                // ls.PushString("3.0");
-                // ls.PushNumber(4.0);
-                // printStack(ls);
-                //
-                // ls.Arith(Consts.LUA_OPADD);
-                // printStack(ls);
-                // ls.Arith(Consts.LUA_OPBNOT);
-                // printStack(ls);
-                // ls.Len(2);
-                // printStack(ls);
-                // ls.Concat(3);
-                // printStack(ls);
                 
                 if (args.Length <= 0) return;
                 try
@@ -51,8 +29,9 @@ namespace luacsharp
                     var data = new byte[fs.Length];
                     fs.Read(data, 0, data.Length);
 
-                    var ls = state.LuaState.New(20);
-                    ls.Load(ref data, args[0], "b");
+                    var ls = state.LuaState.New();
+                    ls.Register("print", print);
+                    ls.Load(ref data, "chunk", "b");
                     ls.Call(0, 0);
                 }
                 catch (Exception e)
@@ -64,6 +43,33 @@ namespace luacsharp
             {
                 Console.WriteLine(e.ToString());
             }
+        }
+        static int print(LuaState ls)
+        {
+            var nArgs = ls.GetTop();
+            for (var i = 1; i <= nArgs; i++)
+            {
+                if (ls.IsBoolean(i))
+                {
+                    Console.Write("{0}", ls.ToBoolean(i));
+                }
+                else if (ls.IsString(i))
+                {
+                    Console.Write(ls.ToString(i));
+                }
+                else
+                {
+                    Console.Write(ls.TypeName(ls.Type(i)));
+                }
+
+                if (i < nArgs)
+                {
+                    Console.Write("\t");
+                }
+            }
+
+            Console.WriteLine();
+            return 0;
         }
         
         // static void luaMain(Prototype proto)

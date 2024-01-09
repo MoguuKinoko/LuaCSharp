@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using luacsharp.API;
 using luacsharp.binchunk;
 using luacsharp.vm;
 using LuaVm = luacsharp.API.LuaState;
@@ -22,8 +23,14 @@ namespace luacsharp.state
             if (val.GetType().IsEquivalentTo(typeof(Closure)))
             {
                 var c = (Closure) val;
-                Console.WriteLine("call {0}<{1},{2}>", c.proto.Source, c.proto.LineDefined, c.proto.LastLineDefined);
-                callLuaClosure(nArgs, nResults, ref c);
+                if (c.proto != null)
+                {
+                    callLuaClosure(nArgs, nResults, c);
+                }
+                else
+                {
+                    callCsharpClosure(nArgs, nResults, c);
+                }
             }
             else
             {
@@ -31,14 +38,14 @@ namespace luacsharp.state
             }
         }
 
-        void callLuaClosure(int nArgs, int nResults, ref Closure c)
+        void callLuaClosure(int nArgs, int nResults, Closure c)
         {
             var nRegs = (int) c.proto.MaxStackSize;
             var nParams = (int) c.proto.NumParams;
             var isVararg = c.proto.IsVararg == 1;
 
             // create new lua stack
-            var newStack = LuaStack.newLuaStack(nRegs + 20);
+            var newStack = LuaStack.newLuaStack(nRegs + Consts.LUA_MINSTACK, this);
             newStack.closure = c;
 
             // pass args, pop func
@@ -74,6 +81,31 @@ namespace luacsharp.state
                 {
                     break;
                 }
+            }
+        }
+        
+        void callCsharpClosure(int nArgs, int nResults, Closure c)
+        {
+            // create new lua stack
+            var newStack = LuaStack.newLuaStack(nArgs + Consts.LUA_MINSTACK, this);
+            newStack.closure = c;
+
+            // pass args, pop func
+            var args = stack.popN(nArgs);
+            newStack.pushN(args, nArgs);
+            stack.pop();
+
+            // run closure
+            pushLuaStack(newStack);
+            var r = c.csharpFunc(this);
+            popLuaStack();
+
+            // return results
+            if (nResults != 0)
+            {
+                var results = newStack.popN(r);
+                stack.check(results.Length);
+                stack.pushN(results, nResults);
             }
         }
     }

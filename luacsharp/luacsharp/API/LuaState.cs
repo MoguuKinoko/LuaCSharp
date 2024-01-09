@@ -5,6 +5,7 @@ using CompareOp = System.Int32;
 
 namespace luacsharp.API
 {
+    public delegate int CsharpFunction(LuaState luaState);
     public partial interface LuaState
     {
         int LuaType { get; set; }
@@ -32,11 +33,11 @@ namespace luacsharp.API
         bool IsString(int idx);
         bool ToBoolean(int idx);
         long ToInteger(int idx);
-        Tuple<long, bool> ToIntegerX(int idx);
+        (long, bool) ToIntegerX(int idx);
         double ToNumber(int idx);
-        Tuple<double, bool> ToNumberX(int idx);
+        (double, bool) ToNumberX(int idx);
         string ToString(int idx);
-        Tuple<string, bool> ToStringX(int idx);
+        (string, bool) ToStringX(int idx);
 
         /* push functions (c# -> stack) */
         void PushNil();
@@ -61,5 +62,15 @@ namespace luacsharp.API
 
         int Load(ref byte[] chunk, string chunkName, string mode);
         void Call(int nArgs, int nResults);
+
+        void PushCsharpFunction(CsharpFunction f);
+        bool IsCsharpFunction(int idx);
+        CsharpFunction ToCsharpFunction(int idx);
+
+        void PushGlobalTable();
+        LuaType GetGlobal(string name);
+        void SetGlobal(string name);
+        void Register(string name, CsharpFunction f);
+
     }
 }

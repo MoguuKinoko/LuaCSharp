@@ -7,14 +7,14 @@ namespace luacsharp.state
         public void Len(int idx)
         {
             var val = stack.get(idx);
-            if (new LuaValue(val).isString())
+            if (LuaValue.isString(val))
             {
-                var s = new LuaValue(val).toString();
+                var s = LuaValue.toString(val);
                 stack.push((long) s.Length);
             }
-            else if (new LuaValue(val).isLuaTable())
+            else if (LuaValue.isLuaTable(val))
             {
-                var t = (LuaTable) new LuaValue(val).value;
+                var t = LuaValue.toLuaTable(val);
                 stack.push((long) t.len());
             }
             else

@@ -70,6 +70,7 @@
         <Compile Include="vm\InscOperators.cs" />
         <Compile Include="vm\InstTable.cs" />
         <Compile Include="vm\Instruction.cs" />
+        <Compile Include="vm\InstUpvalue.cs" />
         <Compile Include="vm\OpCodes.cs" />
     </ItemGroup>
     <ItemGroup>

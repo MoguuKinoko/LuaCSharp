@@ -30,7 +30,7 @@ namespace luacsharp.state
             }
 
             var val = stack.get(idx);
-            return new LuaValue(val).typeOf();
+            return LuaValue.typeOf(val);
         }
 
         public bool IsNone(int idx)
@@ -70,6 +70,18 @@ namespace luacsharp.state
             return val.GetType().Name.Equals("Int64");
         }
 
+        public bool IsCsharpFunction(int idx)
+        {
+            var val = stack.get(idx);
+            if (val.GetType().IsEquivalentTo(typeof(Closure)))
+            {
+                var c = (Closure) val;
+                return c.csharpFunc != null;
+            }
+
+            return false;
+        }
+
         public bool ToBoolean(int idx)
         {
             var val = stack.get(idx);
@@ -86,7 +98,7 @@ namespace luacsharp.state
 
             switch (val.GetType().Name)
             {
-                case "Boolean": return (bool)val;
+                case "Boolean": return (bool) val;
                 default: return true;
             }
         }
@@ -96,13 +108,13 @@ namespace luacsharp.state
             return ToNumberX(idx).Item1;
         }
 
-        public Tuple<double, bool> ToNumberX(int idx)
+        public (double, bool) ToNumberX(int idx)
         {
             var val = stack.get(idx);
-            return LuaValue.convertToFloat(new LuaValue(val));
+            return LuaValue.convertToFloat(val);
         }
 
-        public Tuple<long, bool> ToIntegerX(int idx)
+        public (long, bool) ToIntegerX(int idx)
         {
             var val = stack.get(idx);
             return LuaValue.convertToInteger(val);
@@ -119,19 +131,31 @@ namespace luacsharp.state
             return ToStringX(idx).Item1;
         }
 
-        public Tuple<string, bool> ToStringX(int idx)
+        public (string, bool) ToStringX(int idx)
         {
             var val = stack.get(idx);
             switch (val.GetType().Name)
             {
-                case "String": return Tuple.Create(new LuaValue(val).toString(), true);
+                case "String": return (LuaValue.toString(val), true);
                 case "Int64":
                 case "Double":
                     var s = val;
                     stack.set(idx, s);
-                    return Tuple.Create(Convert.ToString(s), true);
-                default: return Tuple.Create("", false);
+                    return (Convert.ToString(s), true);
+                default: return ("", false);
             }
+        }
+
+        public CsharpFunction ToCsharpFunction(int idx)
+        {
+            var val = stack.get(idx);
+            if (val.GetType().IsEquivalentTo(typeof(Closure)))
+            {
+                var c = (Closure) val;
+                return c.csharpFunc;
+            }
+
+            return null;
         }
     }
 }
