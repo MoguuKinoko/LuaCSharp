@@ -74,6 +74,7 @@
         <Compile Include="vm\OpCodes.cs" />
     </ItemGroup>
     <ItemGroup>
+      <Content Include="lua\chapter10.lua" />
       <Content Include="lua\hello_world.lua" />
       <Content Include="lua\sum.lua" />
       <Content Include="lua\test.lua" />
