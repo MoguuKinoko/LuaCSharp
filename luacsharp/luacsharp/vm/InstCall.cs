@@ -129,8 +129,6 @@ namespace luacsharp.vm
             var ab_ = i.ABC();
             var a = ab_.Item1 + 1;
             var b = ab_.Item2;
-
-            // todo: optimize tail call!
             var c = 0;
             var nArgs = _pushFuncAndArgs(a, b, ref vm);
             vm.Call(nArgs, c - 1);

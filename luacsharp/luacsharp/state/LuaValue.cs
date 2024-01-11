@@ -73,16 +73,18 @@ namespace luacsharp.state
 
             // Console.WriteLine("\n" + value.GetType().Name);
 
-            switch (value.GetType().Name)
+            switch (value)
             {
-                case "Boolean": return Consts.LUA_TBOOLEAN;
-                case "Double": return Consts.LUA_TNUMBER;
-                case "Int64": return Consts.LUA_TNUMBER;
-                case "String": return Consts.LUA_TSTRING;
-                case "LuaTable": return Consts.LUA_TTABLE;
-                case "Closure": return Consts.LUA_TFUNCTION;
+                case bool _: return Consts.LUA_TBOOLEAN;
+                case int _: return Consts.LUA_TNUMBER;
+                case double _: return Consts.LUA_TNUMBER;
+                case long _: return Consts.LUA_TNUMBER;
+                case string _: return Consts.LUA_TSTRING;
+                case LuaTable _: return Consts.LUA_TTABLE;
+                case Closure _: return Consts.LUA_TFUNCTION;
             }
 
+            Console.WriteLine(value.GetType().Name);
             throw new Exception("todo!");
         }
 
@@ -107,7 +109,7 @@ namespace luacsharp.state
                 default: return (0L, false);
             }
         }
-
+  
         private (long, bool) _stringToInteger(string s)
         {
             var v = number.Parser.ParseInteger(s);
@@ -123,6 +125,30 @@ namespace luacsharp.state
             }
 
             return (0L, false);
+        }
+        
+        public static void setMetatable(object val, LuaTable mt, LuaState ls)
+        {
+            if (val is LuaTable luaTable)
+            {
+                luaTable.metatable = mt;
+                return;
+            }
+
+            var key = "_MT" + typeOf(val);
+            ls.registry.put(key, mt);
+        }
+
+        public static LuaTable getMetatable(object val, LuaState ls)
+        {
+            if (val is LuaTable luaTable)
+            {
+                return luaTable.metatable;
+            }
+
+            var key = "_MT" + typeOf(val);
+            var mt = ls.registry.get(key);
+            return mt is LuaTable l ? l : null;
         }
     }
 }
