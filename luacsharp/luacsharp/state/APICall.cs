@@ -7,7 +7,7 @@ using LuaVm = luacsharp.API.LuaState;
 
 namespace luacsharp.state
 {
-    public partial class LuaState
+    public partial struct LuaState
     {
         public int Load(ref byte[] chunk, string chunkName, string mode)
         {
@@ -29,29 +29,16 @@ namespace luacsharp.state
         public void Call(int nArgs, int nResults)
         {
             var val = stack.get(-(nArgs + 1));
-            var f = val is Closure ? val : null;
-            if (f is null)
+            if (val.GetType().IsEquivalentTo(typeof(Closure)))
             {
-                var mf = getMetafield(val, "__call", this);
-                if (mf is Closure)
+                var c = (Closure) val;
+                if (c.proto != null)
                 {
-                    stack.push(null);
-                    Insert(-(nArgs + 2));
-                    nArgs += 1;
-                    f = mf;
-                }
-            }
-
-            if (f != null)
-            {
-                var closure = (Closure) f;
-                if (closure.proto != null)
-                {
-                    callLuaClosure(nArgs, nResults, closure);
+                    callLuaClosure(nArgs, nResults, c);
                 }
                 else
                 {
-                    callCsharpClosure(nArgs, nResults, closure);
+                    callCsharpClosure(nArgs, nResults, c);
                 }
             }
             else
@@ -98,7 +85,7 @@ namespace luacsharp.state
             for (;;)
             {
                 var inst = new vm.Instruction(Fetch());
-                inst.Execute(this);
+                inst.Execute(ref this);
                 if (inst.Opcode() == vm.OpCodes.OP_RETURN)
                 {
                     break;

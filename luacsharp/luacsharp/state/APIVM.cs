@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace luacsharp.state
 {
-    public partial class LuaState
+    public partial struct LuaState
     {
         public int PC()
         {

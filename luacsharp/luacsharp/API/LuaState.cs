@@ -73,15 +73,5 @@ namespace luacsharp.API
         void Register(string name, CsharpFunction f);
         void PushCsharpClosure(CsharpFunction f, int n);
 
-        bool GetMetatable(int idx);
-        void SetMetatable(int idx);
-        uint RawLen(int idx);
-        bool RawEqual(int idx1, int idx2);
-        LuaType RawGet(int idx);
-        void RawSet(int idx);
-        LuaType RawGetI(int idx, long i);
-        void RawSetI(int idx, long i);
-
-
     }
 }

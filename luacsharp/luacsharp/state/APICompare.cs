@@ -3,7 +3,7 @@ using luacsharp.API;
 using CompareOp = System.Int32;
 namespace luacsharp.state
 {
-    public partial class LuaState
+    public partial struct LuaState
     {
         public bool Compare(int idx1, int idx2, CompareOp op)
         {
@@ -16,25 +16,14 @@ namespace luacsharp.state
             var b = stack.get(idx2);
             switch (op)
             {
-                case Consts.LUA_OPEQ: return _eq(a, b, this);
-                case Consts.LUA_OPLT: return _lt(a, b, this);
-                case Consts.LUA_OPLE: return _le(a, b, this);
+                case Consts.LUA_OPEQ: return _eq(a, b);
+                case Consts.LUA_OPLT: return _lt(a, b);
+                case Consts.LUA_OPLE: return _le(a, b);
                 default: throw new Exception("invalid compare op!");
             }
         }
-        
-        public bool RawEqual(int idx1, int idx2)
-        {
-            if (!stack.isValid(idx1) || !stack.isValid(idx2)) {
-                return false;
-            }
 
-            var a = stack.get(idx1);
-            var b = stack.get(idx2);
-            return _eq(a, b, null);
-        }
-
-        bool _eq(object a, object b, LuaState ls)
+        bool _eq(object a, object b)
         {
             if (a == null)
             {
@@ -45,56 +34,44 @@ namespace luacsharp.state
             {
                 return false;
             }
-            
-            
-            switch (a)
+
+            switch (a.GetType().Name)
             {
-                case bool aBoolVal:
-                    if (b is bool bBoolVal)
+                case "Boolean":
+                    if (b.GetType().Name.Equals("Boolean"))
                     {
-                        return aBoolVal == bBoolVal;
+                        return a == b;
                     }
 
                     return false;
-                case string aStr:
-                    if (b is string bStr)
+                case "String":
+                    if (b.GetType().Name.Equals("String"))
                     {
-                        return aStr.Equals(bStr);
+                        return a.Equals(b);
                     }
 
                     return false;
-                case long aLong:
-                    switch (b)
+                case "Int64":
+                    switch (b.GetType().Name)
                     {
-                        case long bLong:
-                            return aLong == bLong;
-                        case double bDouble:
-                            return bDouble.Equals(Convert.ToDouble(aLong));
+                        case "Int64":
+                            return (long) a == (long) b;
+                        case "Double":
+                            return ((double) b).Equals((double) a);
                         default: return false;
                     }
-                case double aDouble:
-                    switch (b)
+                case "Double":
+                    switch (b.GetType().Name)
                     {
-                        case double bDouble: return aDouble.Equals(bDouble);
-                        case long bLong: return aDouble.Equals(Convert.ToDouble(bLong));
+                        case "Double": return a.Equals(b);
+                        case "Int64": return a.Equals((double) b);
                         default: return false;
                     }
-                case LuaTable aLuaTable:
-                    if (b is LuaTable bLuaTable && aLuaTable != bLuaTable && ls != null)
-                    {
-                        var (result, ok) = callMetamethod(aLuaTable, bLuaTable, "__eq", ls);
-                        if (ok)
-                        {
-                            return ConvertToBoolean(result);
-                        }
-                    }
-
-                    return a == b;
                 default: return a == b;
             }
         }
 
-        bool _lt(object a, object b, LuaState ls)
+        bool _lt(object a, object b)
         {
             switch (a.GetType().Name)
             {
@@ -122,17 +99,11 @@ namespace luacsharp.state
 
                     break;
             }
-            
-            var (result, ok) = callMetamethod(a, b, "__lt", ls);
-            if (ok)
-            {
-                return ConvertToBoolean(result);
-            }
 
             throw new Exception("comparison error!");
         }
 
-        bool _le(object a, object b, LuaState ls)
+        bool _le(object a, object b)
         {
             switch (a.GetType().Name)
             {
@@ -159,18 +130,6 @@ namespace luacsharp.state
                     }
 
                     break;
-            }
-            
-            var (result, ok) = callMetamethod(a, b, "__le", ls);
-            if (ok)
-            {
-                return ConvertToBoolean(result);
-            }
-
-            var (result2, ok2) = callMetamethod(b, a,   "__lt", ls);
-            if (ok2)
-            {
-                return !ConvertToBoolean(result2);
             }
 
             throw new Exception("comparison error!");

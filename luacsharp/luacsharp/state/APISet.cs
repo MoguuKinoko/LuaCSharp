@@ -3,60 +3,39 @@ using luacsharp.API;
 
 namespace luacsharp.state
 {
-    partial class LuaState
+    partial struct LuaState
     {
         public void SetTable(int idx)
         {
             var v = stack.pop();
             var k = stack.pop();
-            setTable(idx, k, v, false);
+            setTable(idx, k, v);
         }
 
-        void setTable(object t, object k, object v, bool raw)
+        void setTable(int idx, object k, object v)
         {
-            if (t is LuaTable tbl)
+            var t = stack.get(idx);
+            if (LuaValue.isLuaTable(t))
             {
-                if (raw || tbl.get(k) != null || !tbl.hasMetafield("__newindex"))
-                {
-                    tbl.put(k, v);
-                    return;
-                }
+                var table = LuaValue.toLuaTable(t);
+                table.put(k, v);
+                stack.set(idx, table);
+                return;
             }
 
-            if (!raw)
-            {
-                var mf = getMetafield(t, "__newindex", this);
-                if (mf != null)
-                {
-                    switch (mf)
-                    {
-                        case LuaTable _:
-                            setTable(mf, k, v, false);
-                            return;
-                        case Closure _:
-                            stack.push(mf);
-                            stack.push(t);
-                            stack.push(k);
-                            stack.push(v);
-                            Call(3, 0);
-                            return;
-                    }
-                }
-            }
-
-            throw new Exception("index error!");
+            throw new Exception("not a table!");
         }
 
         public void SetField(int idx, string k)
         {
             var v = stack.pop();
-            setTable(idx, k, v, false);
+            setTable(idx, k, v);
         }
 
         public void SetI(int idx, long n)
         {
             var v = stack.pop();
-            setTable(idx, n, v, false);
+            setTable(idx, n, v);
         }
 
         public void SetGlobal(string name)
@@ -86,40 +65,6 @@ namespace luacsharp.state
         {
             PushCsharpFunction(f);
             SetGlobal(name);
-        }
-        
-        public void SetMetatable(int idx)
-        {
-            var val = stack.get(idx);
-            var mtVal = stack.pop();
-
-            if (mtVal == null)
-            {
-                LuaValue.setMetatable(val, null, this);
-            }
-            else if (mtVal is LuaTable mtl)
-            {
-                LuaValue.setMetatable(val, mtl, this);
-            }
-            else
-            {
-                throw new Exception("table expected!"); // todo
-            }
-        }
-
-        public void RawSet(int idx)
-        {
-            var t = stack.get(idx);
-            var v = stack.pop();
-            var k = stack.pop();
-            setTable(t, k, v, true);
-        }
-
-        public void RawSetI(int idx, long i)
-        {
-            var t = stack.get(idx);
-            var v = stack.pop();
-            setTable(t, i, v, true);
         }
     }
 }

@@ -4,7 +4,7 @@ using luacsharp.binchunk;
 
 namespace luacsharp.state
 {
-    public partial class LuaState : API.LuaState
+    public partial struct LuaState : API.LuaState
     {
         public LuaStack stack;
         public LuaTable registry;
