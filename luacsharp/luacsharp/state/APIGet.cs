@@ -3,7 +3,7 @@ using luacsharp.API;
 using LuaType = System.Int32;
 namespace luacsharp.state
 {
-    partial struct LuaState
+    partial class LuaState
     {
         public void NewTable()
         {
@@ -20,22 +20,41 @@ namespace luacsharp.state
         {
             var t = stack.get(idx);
             var k = stack.pop();
-            return getTable(t, k);
+            return getTable(t, k, false);
         }
 
-        LuaType getTable(object t, object k)
+        LuaType getTable(object t, object k, bool raw)
         {
             if (LuaValue.isLuaTable(t))
             {
                 var tbl = LuaValue.toLuaTable(t);
                 var v = tbl.get(k);
-                if (v.GetType().IsEquivalentTo(typeof(LuaValue)))
+                if (raw || v != null || !tbl.hasMetafield("__index"))
                 {
-                    v = ((LuaValue) v);
+                    stack.push(v);
+                    return LuaValue.typeOf(v);
                 }
+            }
 
-                stack.push(v);
-                return LuaValue.typeOf(v);
+            if (!raw)
+            {
+                var mf = getMetafield(t, "__index", this);
+                if (mf != null)
+                {
+                    switch (mf)
+                    {
+                        case LuaTable mfTable:
+                            getTable(mfTable, k, false);
+                            break;
+                        case Closure closure:
+                            stack.push(closure);
+                            stack.push(t);
+                            stack.push(k);
+                            Call(2, 1);
+                            var v = stack.get(-1);
+                            return LuaValue.typeOf(v);
+                    }
+                }
             }
 
             throw new Exception("not a table!");
@@ -44,7 +63,7 @@ namespace luacsharp.state
         public LuaType GetField(int idx, string k)
         {
             var t = stack.get(idx);
-            return getTable(t, k);
+            return getTable(t, k, false);
 //            PushString(k);
 //            return GetTable(idx);
         }
@@ -52,13 +71,13 @@ namespace luacsharp.state
         public LuaType GetI(int idx, long i)
         {
             var t = stack.get(idx);
-            return getTable(t, i);
+            return getTable(t, i, false);
         }
 
         public int GetGlobal(string name)
         {
             var t = registry.get(Consts.LUA_RIDX_GLOBALS);
-            return getTable(t, name);
+            return getTable(t, name, false);
         }
     }
 }

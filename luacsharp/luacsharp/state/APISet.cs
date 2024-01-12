@@ -3,7 +3,7 @@ using luacsharp.API;
 
 namespace luacsharp.state
 {
-    partial struct LuaState
+    partial class LuaState
     {
         public void SetTable(int idx)
         {
@@ -42,13 +42,13 @@ namespace luacsharp.state
         {
             var t = registry.get(Consts.LUA_RIDX_GLOBALS);
             var v = stack.pop();
-            setTable(ref t, name, v);
+            setTable(ref t, name, v, false);
             registry.put(Consts.LUA_RIDX_GLOBALS, t);
         }
 
 
         // t[k]=v
-        void setTable(ref object t, object k, object v)
+        void setTable(ref object t, object k, object v, bool raw)
         {
             if (LuaValue.isLuaTable(t))
             {
@@ -56,6 +56,11 @@ namespace luacsharp.state
                 tbl.put(k, v);
                 t = tbl;
                 return;
+                // if (raw || tbl.get(k) != null || !tbl.hasMetafield("__newindex"))
+                // {
+                //     tbl.put(k, v);
+                //     return;
+                // }
             }
 
             throw new Exception("not a table!");

@@ -3,7 +3,7 @@ using luacsharp.API;
 using CompareOp = System.Int32;
 namespace luacsharp.state
 {
-    public partial struct LuaState
+    public partial class LuaState
     {
         public bool Compare(int idx1, int idx2, CompareOp op)
         {
@@ -16,14 +16,14 @@ namespace luacsharp.state
             var b = stack.get(idx2);
             switch (op)
             {
-                case Consts.LUA_OPEQ: return _eq(a, b);
-                case Consts.LUA_OPLT: return _lt(a, b);
-                case Consts.LUA_OPLE: return _le(a, b);
+                case Consts.LUA_OPEQ: return _eq(a, b, this);
+                case Consts.LUA_OPLT: return _lt(a, b, this);
+                case Consts.LUA_OPLE: return _le(a, b, this);
                 default: throw new Exception("invalid compare op!");
             }
         }
 
-        bool _eq(object a, object b)
+        bool _eq(object a, object b, LuaState ls)
         {
             if (a == null)
             {
@@ -35,103 +35,123 @@ namespace luacsharp.state
                 return false;
             }
 
-            switch (a.GetType().Name)
+            switch (a)
             {
-                case "Boolean":
-                    if (b.GetType().Name.Equals("Boolean"))
+                case bool aBoolVal:
+                    if (b is bool bBoolVal)
                     {
-                        return a == b;
+                        return aBoolVal == bBoolVal;
                     }
 
                     return false;
-                case "String":
-                    if (b.GetType().Name.Equals("String"))
+                case string aStr:
+                    if (b is string bStr)
                     {
-                        return a.Equals(b);
+                        return aStr.Equals(bStr);
                     }
 
                     return false;
-                case "Int64":
-                    switch (b.GetType().Name)
+                case long aLong:
+                    switch (b)
                     {
-                        case "Int64":
-                            return (long) a == (long) b;
-                        case "Double":
-                            return ((double) b).Equals((double) a);
+                        case long bLong:
+                            return aLong == bLong;
+                        case double bDouble:
+                            return bDouble.Equals(Convert.ToDouble(aLong));
                         default: return false;
                     }
-                case "Double":
-                    switch (b.GetType().Name)
+                case double aDouble:
+                    switch (b)
                     {
-                        case "Double": return a.Equals(b);
-                        case "Int64": return a.Equals((double) b);
+                        case double bDouble: return aDouble.Equals(bDouble);
+                        case long bLong: return aDouble.Equals(Convert.ToDouble(bLong));
                         default: return false;
                     }
+                case LuaTable aLuaTable:
+                    if (b is LuaTable bLuaTable && aLuaTable != bLuaTable && ls != null)
+                    {
+                        var (result, ok) = callMetamethod(aLuaTable, bLuaTable, "__eq", ls);
+                        if (ok)
+                        {
+                            return ConvertToBoolean(result);
+                        }
+                    }
+
+                    return a == b;
                 default: return a == b;
             }
         }
 
-        bool _lt(object a, object b)
+        bool _lt(object a, object b, LuaState ls)
         {
-            switch (a.GetType().Name)
+            switch (a)
             {
-                case "String":
-                    if (b.GetType().Name.Equals("String"))
+                case string aStr:
+                    if (b is string bStr)
                     {
-                        return String.Compare(((string) a), (string) b, StringComparison.Ordinal) == -1;
+                        return string.Compare(aStr, bStr, StringComparison.Ordinal) < 0;
                     }
 
                     break;
-                case "Int64":
-                    switch (b.GetType().Name)
+                case long aLong:
+                    switch (b)
                     {
-                        case "Int64": return (long) a < (long) b;
-                        case "Double": return (double) a < (double) b;
+                        case long bLong: return aLong < bLong;
+                        case double bDouble: return aLong < bDouble;
                     }
 
                     break;
-                case "Double":
-                    switch (b.GetType().Name)
+                case double aDouble:
+                    switch (b)
                     {
-                        case "Double": return (double) a < (double) b;
-                        case "Int64": return (double) a < (double) b;
+                        case double bDouble: return aDouble < bDouble;
+                        case long bLong: return aDouble < bLong;
                     }
 
                     break;
+            }
+
+            var (result, ok) = callMetamethod(a, b, "__lt", ls);
+            if (ok)
+            {
+                return ConvertToBoolean(result);
             }
 
             throw new Exception("comparison error!");
         }
 
-        bool _le(object a, object b)
+        bool _le(object a, object b, LuaState ls)
         {
-            switch (a.GetType().Name)
+            switch (a)
             {
-                case "String":
-                    if (b.GetType().Name.Equals("String"))
+                case string aStr:
+                    if (b is string bStr)
                     {
-                        return string.CompareOrdinal((string) a, (string) b) <= 0;
+                        return string.CompareOrdinal((string) aStr, (string) bStr) <= 0;
                     }
-
                     break;
-                case "Int64":
-                    switch (b.GetType().Name)
+                case long aLong:
+                    switch (b)
                     {
-                        case "Int64": return (long) a <= (long) b;
-                        case "Double": return Convert.ToDouble(a) <= Convert.ToDouble(b);
+                        case long bLong: return aLong <= bLong;
+                        case double bDouble: return aLong <= bDouble;
                     }
-
                     break;
-                case "Double":
-                    switch (b.GetType().Name)
+                case double aDouble:
+                    switch (b)
                     {
-                        case "Double": return (double) a <= (double) b;
-                        case "Int64": return Convert.ToDouble(a) <= Convert.ToDouble(b);
+                        case double bDouble: return aDouble <= bDouble;
+                        case long bLong: return aDouble <= bLong;
                     }
 
                     break;
             }
 
+            var (result, ok) = callMetamethod(a, b, "__le", ls);
+            if (ok)
+            {
+                return ConvertToBoolean(result);
+            }
             throw new Exception("comparison error!");
         }
     }

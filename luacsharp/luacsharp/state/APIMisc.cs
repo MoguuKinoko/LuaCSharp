@@ -2,7 +2,7 @@ using System;
 
 namespace luacsharp.state
 {
-    public partial struct LuaState
+    public partial class LuaState
     {
         public void Len(int idx)
         {
@@ -12,7 +12,14 @@ namespace luacsharp.state
                 var s = LuaValue.toString(val);
                 stack.push((long) s.Length);
             }
-            else if (LuaValue.isLuaTable(val))
+
+            var (result, ok) = callMetamethod(val, val, "__len", this);
+            if (ok)
+            {
+                stack.push(result);
+            }
+            
+            if (LuaValue.isLuaTable(val))
             {
                 var t = LuaValue.toLuaTable(val);
                 stack.push((long) t.len());
@@ -40,6 +47,15 @@ namespace luacsharp.state
                         stack.pop();
                         stack.pop();
                         stack.push(s1 + s2);
+                        continue;
+                    }
+
+                    var b = stack.pop();
+                    var a = stack.pop();
+                    var (result, ok) = callMetamethod(a, b, "__concat", this);
+                    if (ok)
+                    {
+                        stack.push(result);
                         continue;
                     }
 

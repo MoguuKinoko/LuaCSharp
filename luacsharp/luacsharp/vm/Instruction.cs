@@ -67,7 +67,7 @@ namespace luacsharp.vm
             return OpCodes.opcodes[Opcode()].argCMode;
         }
         
-        public void Execute(ref LuaVm vm)
+        public void Execute(LuaVm vm)
         {
             var action = OpCodes.opcodes[Opcode()].action;
             if (action != null)

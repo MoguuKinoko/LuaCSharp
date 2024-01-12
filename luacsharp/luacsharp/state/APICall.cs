@@ -7,7 +7,7 @@ using LuaVm = luacsharp.API.LuaState;
 
 namespace luacsharp.state
 {
-    public partial struct LuaState
+    public partial class LuaState
     {
         public int Load(ref byte[] chunk, string chunkName, string mode)
         {
@@ -85,7 +85,7 @@ namespace luacsharp.state
             for (;;)
             {
                 var inst = new vm.Instruction(Fetch());
-                inst.Execute(ref this);
+                inst.Execute(this);
                 if (inst.Opcode() == vm.OpCodes.OP_RETURN)
                 {
                     break;

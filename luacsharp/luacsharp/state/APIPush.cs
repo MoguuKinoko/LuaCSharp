@@ -3,7 +3,7 @@ using luacsharp.API;
 
 namespace luacsharp.state
 {
-    public partial struct LuaState
+    public partial class LuaState
     {
         public void PushNil()
         {

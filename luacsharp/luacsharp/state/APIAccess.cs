@@ -4,7 +4,7 @@ using LuaType = System.Int32;
 
 namespace luacsharp.state
 {
-    public partial struct LuaState
+    public partial class LuaState
     {
         public string TypeName(LuaType tp)
         {

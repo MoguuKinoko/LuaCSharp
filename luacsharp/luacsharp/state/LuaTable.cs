@@ -6,10 +6,11 @@ using Math = luacsharp.number.Math;
 
 namespace luacsharp.state
 {
-    public struct LuaTable
+    public class LuaTable
     {
         private object[] arr;
         private Dictionary<object, object> _map;
+        public LuaTable metatable;
 
         public static LuaTable newLuaTable(int nArr, int nRec)
         {
@@ -165,6 +166,11 @@ namespace luacsharp.state
             {
                 _map.Remove(key);
             }
+        }
+
+        public bool hasMetafield(string fieldName)
+        {
+            return metatable != null && metatable.get(fieldName) != null;
         }
     }
 }

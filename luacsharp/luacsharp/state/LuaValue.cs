@@ -124,5 +124,29 @@ namespace luacsharp.state
 
             return (0L, false);
         }
+        
+        public static void setMetatable(object val, LuaTable mt, LuaState ls)
+        {
+            if (val is LuaTable luaTable)
+            {
+                luaTable.metatable = mt;
+                return;
+            }
+
+            var key = "_MT" + typeOf(val);
+            ls.registry.put(key, mt);
+        }
+
+        public static LuaTable getMetatable(object val, LuaState ls)
+        {
+            if (val is LuaTable luaTable)
+            {
+                return luaTable.metatable;
+            }
+
+            var key = "_MT" + typeOf(val);
+            var mt = ls.registry.get(key);
+            return mt is LuaTable l ? l : null;
+        }
     }
 }

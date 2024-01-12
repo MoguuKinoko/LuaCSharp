@@ -5,87 +5,102 @@ using CompareOp = System.Int32;
 
 namespace luacsharp.state
 {
-     internal delegate long IntegerFunc(long a, long b);
+    internal delegate long IntegerFunc(long a, long b);
 
     internal delegate double FloatFunc(double a, double b);
 
     struct Operator
     {
+        internal string metamethod;
         public IntegerFunc integerFunc;
         public FloatFunc floatFunc;
     }
 
-    public partial struct LuaState
+    public partial class LuaState
     {
         private static Operator[] operators = new Operator[]
         {
             new Operator
             {
+                metamethod = "__add",
                 integerFunc = iadd,
                 floatFunc = fadd
             },
             new Operator
             {
+                metamethod = "__sub",
                 integerFunc = isub,
                 floatFunc = fsub
             },
             new Operator
             {
+                metamethod = "__mul",
                 integerFunc = imul,
                 floatFunc = fmul
             },
             new Operator
             {
+                metamethod = "__mod",
                 integerFunc = imod,
                 floatFunc = fmod
             },
             new Operator
             {
+                metamethod = "__pow",
                 integerFunc = null,
                 floatFunc = pow
             },
             new Operator
             {
+                metamethod = "__div",
                 integerFunc = null,
                 floatFunc = div
             },
             new Operator
             {
+                metamethod = "__idiv",
                 integerFunc = iidiv,
                 floatFunc = fidiv
             },
             new Operator
             {
+                metamethod = "__band",
                 integerFunc = band,
                 floatFunc = null
             },
             new Operator
             {
+                metamethod = "__bor",
                 integerFunc = bor,
                 floatFunc = null
             },
             new Operator
             {
+                metamethod = "__bxor",
                 integerFunc = bxor,
                 floatFunc = null
             },
             new Operator
             {
+                metamethod = "__shl",
                 integerFunc = shl,
                 floatFunc = null
             },
             new Operator
             {
+                metamethod = "__shr",
                 integerFunc = shr,
                 floatFunc = null
             },
             new Operator
             {
+                metamethod = "__unm",
                 integerFunc = inum,
                 floatFunc = fnum
             },
             new Operator
             {
+                metamethod = "__bnot",
                 integerFunc = bnot,
                 floatFunc = null
             }
@@ -211,11 +226,18 @@ namespace luacsharp.state
             if (result != null)
             {
                 stack.push(result);
+                return;
             }
-            else
+
+            var mm = opr.metamethod;
+            var (result2, ok) = callMetamethod(a, b, mm, this);
+            if (ok)
             {
-                throw new Exception("arithmetic error!");
+                stack.push(result2);
+                return;
             }
+            
+            throw new Exception("arithmetic error!");
         }
 
         object _arith(object a, object b, Operator op)
@@ -256,6 +278,33 @@ namespace luacsharp.state
             }
 
             return null;
+        }
+        
+        public object getMetafield(object val, string fieldName, LuaState ls)
+        {
+            var mt = LuaValue.getMetatable(val, ls);
+            return mt?.get(fieldName);
+        }
+        
+        public (object, bool) callMetamethod(object a, object b, string mmName, LuaState ls)
+        {
+            var mm = getMetafield(a, mmName, ls);
+            if (mm is null)
+            {
+                mm = getMetafield(b, mmName, ls);
+
+                if (mm is null)
+                {
+                    return (null, false);
+                }
+            }
+
+            //ls.stack.check(4);
+            ls.stack.push(mm);
+            ls.stack.push(a);
+            ls.stack.push(b);
+            ls.Call(2, 1);
+            return (ls.stack.pop(), true);
         }
     }
 }
