@@ -46,13 +46,14 @@ namespace luacsharp.state
 
         public void LoadVararg(int n)
         {
+            var varargs = stack.varargs ?? new List<object>();
             if (n < 0)
             {
-                n = stack.varargs.Length;
+                n = varargs.Count;
             }
 
-            stack.check(n);
-            stack.pushN(stack.varargs, n);
+            //stack.check(n)
+            stack.pushN(varargs, n);
         }
 
         public void LoadProto(int idx)
@@ -78,7 +79,7 @@ namespace luacsharp.state
                     }
                     else
                     {
-                        closure.upvals[i] = new Upvalue {val = stack.slots[uvIdx]};
+                        closure.upvals[i] = new Upvalue(stack, uvIdx);
                         stack.openuvs[uvIdx] = closure.upvals[i];
                     }
                 }
@@ -91,13 +92,19 @@ namespace luacsharp.state
         
         public void CloseUpvalues(int a)
         {
-            for (var i = 0; i < stack.openuvs.Count; i++)
+            if (stack.openuvs != null)
             {
-                if (i >= a - 1)
-                {  var openuv = stack.openuvs[i];
-                    var val= openuv.val;
-                    openuv.val = val;
-                    stack.openuvs.Remove(i);
+                for (var i = 0; i < stack.openuvs.Count; i++)
+                {
+                    Upvalue uv = stack.openuvs[i];
+                    if (uv.Index >= a - 1)
+                    {
+                        uv.Migrate();
+//                        var openuv = stack.openuvs[i];
+//                        var val = openuv.val;
+//                        openuv.val = val;
+                        stack.openuvs.Remove(i);
+                    }
                 }
             }
         }

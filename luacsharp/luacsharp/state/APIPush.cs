@@ -47,8 +47,10 @@ namespace luacsharp.state
             for (var i = n; i > 0; i--)
             {
                 var val = stack.pop();
-                closure.upvals[n - 1] = new Upvalue { val = val };
+                closure.upvals[n - 1] = new Upvalue(val);
             }
+
+            stack.push(closure);
         }
     }
 }

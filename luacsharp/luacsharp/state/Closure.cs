@@ -38,9 +38,4 @@ namespace luacsharp.state
             return c;
         }
     }
-
-    public struct Upvalue
-    {
-        internal object val;
-    }
 }

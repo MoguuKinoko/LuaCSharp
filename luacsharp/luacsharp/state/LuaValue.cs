@@ -73,16 +73,18 @@ namespace luacsharp.state
 
             // Console.WriteLine("\n" + value.GetType().Name);
 
-            switch (value.GetType().Name)
+            switch (value)
             {
-                case "Boolean": return Consts.LUA_TBOOLEAN;
-                case "Double": return Consts.LUA_TNUMBER;
-                case "Int64": return Consts.LUA_TNUMBER;
-                case "String": return Consts.LUA_TSTRING;
-                case "LuaTable": return Consts.LUA_TTABLE;
-                case "Closure": return Consts.LUA_TFUNCTION;
+                case bool _: return Consts.LUA_TBOOLEAN;
+                case double _: return Consts.LUA_TNUMBER;
+                case int _: return Consts.LUA_TNUMBER;
+                case long _: return Consts.LUA_TNUMBER;
+                case string _: return Consts.LUA_TSTRING;
+                case LuaTable _: return Consts.LUA_TTABLE;
+                case Closure _: return Consts.LUA_TFUNCTION;
             }
 
+            Console.WriteLine(value.GetType().Name);
             throw new Exception("todo!");
         }
 

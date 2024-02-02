@@ -65,5 +65,21 @@ namespace luacsharp.state
                 // n==1, do nothing
             }
         }
+        
+        public uint RawLen(int idx)
+        {
+            var val = stack.get(idx);
+            if (val is string valStr)
+            {
+                return (uint) valStr.Length;
+            }
+
+            if (val is LuaTable luaTable)
+            {
+                return (uint) (luaTable).len();
+            }
+
+            return 0;
+        }
     }
 }

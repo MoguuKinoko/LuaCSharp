@@ -12,7 +12,7 @@ namespace luacsharp.state
 
         public void CreateTable(int nArr, int nRec)
         {
-            var t = LuaTable.newLuaTable(nArr, nRec);
+            var t = new LuaTable(nArr, nRec);
             stack.push(t);
         }
 
@@ -78,6 +78,32 @@ namespace luacsharp.state
         {
             var t = registry.get(Consts.LUA_RIDX_GLOBALS);
             return getTable(t, name, false);
+        }
+        
+        public bool GetMetatable(int idx)
+        {
+            var val = stack.get(idx);
+            var mt = LuaValue.getMetatable(val, this);
+            if (mt != null)
+            {
+                stack.push(mt);
+                return true;
+            }
+
+            return false;
+        }
+
+        public int RawGet(int idx)
+        {
+            var t = stack.get(idx);
+            var k = stack.pop();
+            return getTable(t, k, true);
+        }
+
+        public int RawGetI(int idx, long i)
+        {
+            var t = stack.get(idx);
+            return getTable(t, i, true);
         }
     }
 }

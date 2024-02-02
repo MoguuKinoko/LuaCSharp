@@ -11,16 +11,13 @@ namespace luacsharp.state
     {
         public int Load(ref byte[] chunk, string chunkName, string mode)
         {
-            var proto = binchunk.BinaryChunk.Undump(chunk);
+            var proto = BinaryChunk.Undump(chunk);
             var c = Closure.newLuaClosure(proto);
             stack.push(c);
             if (proto.Upvalues.Length > 0)
             {
                 var env = registry.get(Consts.LUA_RIDX_GLOBALS);
-                c.upvals[0] = new Upvalue
-                {
-                    val = env
-                };
+                c.upvals[0] = new Upvalue(env);
             }
 
             return 0;
@@ -29,16 +26,29 @@ namespace luacsharp.state
         public void Call(int nArgs, int nResults)
         {
             var val = stack.get(-(nArgs + 1));
-            if (val.GetType().IsEquivalentTo(typeof(Closure)))
+            var f = val is Closure ? val : null;
+            if (f is null)
             {
-                var c = (Closure) val;
-                if (c.proto != null)
+                var mf = getMetafield(val, "__call", this);
+                if (mf is Closure)
                 {
-                    callLuaClosure(nArgs, nResults, c);
+                    stack.push(null);
+                    Insert(-(nArgs + 2));
+                    nArgs += 1;
+                    f = mf;
+                }
+            }
+
+            if (f != null)
+            {
+                var closure = (Closure) f;
+                if (closure.proto != null)
+                {
+                    callLuaClosure(nArgs, nResults, closure);
                 }
                 else
                 {
-                    callCsharpClosure(nArgs, nResults, c);
+                    callCsharpClosure(nArgs, nResults, closure);
                 }
             }
             else
@@ -54,28 +64,27 @@ namespace luacsharp.state
             var isVararg = c.proto.IsVararg == 1;
 
             // create new lua stack
-            var newStack = LuaStack.newLuaStack(nRegs + Consts.LUA_MINSTACK, this);
-            newStack.closure = c;
+            var newStack = new LuaStack(this) {closure = c};
 
             // pass args, pop func
             var funcAndArgs = stack.popN(nArgs + 1);
-            newStack.pushN(funcAndArgs.Skip(1).ToArray(), nParams);
-            newStack.top = nRegs;
+            newStack.pushN(funcAndArgs.Skip(1).ToArray().ToList(), nParams);
             if (nArgs > nParams && isVararg)
             {
-                newStack.varargs = funcAndArgs.Skip(nParams + 1).ToArray();
+                newStack.varargs = funcAndArgs.Skip(nParams + 1).ToArray().ToList();
             }
 
             // run closure
             pushLuaStack(newStack);
+            SetTop(nRegs);
             runLuaClosure();
             popLuaStack();
 
             // return results
             if (nResults != 0)
             {
-                var results = newStack.popN(newStack.top - nRegs);
-                stack.check(results.Length);
+                var results = newStack.popN(newStack.top() - nRegs);
+                //stack.check(results.size())
                 stack.pushN(results, nResults);
             }
         }
@@ -93,15 +102,17 @@ namespace luacsharp.state
             }
         }
         
-        void callCsharpClosure(int nArgs, int nResults, Closure c)
+        private void callCsharpClosure(int nArgs, int nResults, Closure c)
         {
             // create new lua stack
-            var newStack = LuaStack.newLuaStack(nArgs + Consts.LUA_MINSTACK, this);
-            newStack.closure = c;
+            var newStack = new LuaStack(this) {closure = c};
 
             // pass args, pop func
-            var args = stack.popN(nArgs);
-            newStack.pushN(args, nArgs);
+            if (nArgs > 0)
+            {
+                newStack.pushN(stack.popN(nArgs), nArgs);
+            }
+
             stack.pop();
 
             // run closure
@@ -113,7 +124,7 @@ namespace luacsharp.state
             if (nResults != 0)
             {
                 var results = newStack.popN(r);
-                stack.check(results.Length);
+                //stack.check(results.Length);
                 stack.pushN(results, nResults);
             }
         }

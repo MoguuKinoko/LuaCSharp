@@ -29,8 +29,10 @@ namespace luacsharp
                     var data = new byte[fs.Length];
                     fs.Read(data, 0, data.Length);
 
-                    var ls = state.LuaState.New();
+                    var ls = new state.LuaState();
                     ls.Register("print", print);
+                    ls.Register("getmetatable", getMetatable);
+                    ls.Register("setmetatable", setMetatable);
                     ls.Load(ref data, "chunk", "b");
                     ls.Call(0, 0);
                 }
@@ -274,6 +276,22 @@ namespace luacsharp
             }
 
             Console.WriteLine();
+        }
+        
+        private static int getMetatable(LuaState ls)
+        {
+            if (!ls.GetMetatable(1))
+            {
+                ls.PushNil();
+            }
+
+            return 1;
+        }
+
+        private static int setMetatable(LuaState ls)
+        {
+            ls.SetMetatable(1);
+            return 1;
         }
     }
 }

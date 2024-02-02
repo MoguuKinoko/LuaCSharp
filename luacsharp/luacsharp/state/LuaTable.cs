@@ -12,20 +12,17 @@ namespace luacsharp.state
         private Dictionary<object, object> _map;
         public LuaTable metatable;
 
-        public static LuaTable newLuaTable(int nArr, int nRec)
+        public LuaTable(int nArr, int nRec)
         {
-            var t = new LuaTable();
-            if (nArr > 0)
+            if (nArr >= 0)
             {
-                t.arr = new object[nArr];
+                arr = new object[nArr];
             }
 
-            if (nRec > 0)
+            if (nRec >= 0)
             {
-                t._map = new Dictionary<object, object>(nRec);
+                _map = new Dictionary<object, object>(nRec);
             }
-
-            return t;
         }
 
         public object get(object key)
@@ -40,7 +37,15 @@ namespace luacsharp.state
                 }
             }
 
-            return _map[key];
+            if (_map.TryGetValue(key, out object returnValue))
+            {
+                return returnValue;
+            }
+            else
+            {
+                return null;
+            }
+           
         }
 
         object _floatToInteger(object key)

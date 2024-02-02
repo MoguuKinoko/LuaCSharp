@@ -154,5 +154,16 @@ namespace luacsharp.state
             }
             throw new Exception("comparison error!");
         }
+        
+        public bool RawEqual(int idx1, int idx2)
+        {
+            if (!stack.isValid(idx1) || !stack.isValid(idx2)) {
+                return false;
+            }
+
+            var a = stack.get(idx1);
+            var b = stack.get(idx2);
+            return _eq(a, b, null);
+        }
     }
 }

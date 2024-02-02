@@ -9,16 +9,17 @@ namespace luacsharp.state
         public LuaStack stack;
         public LuaTable registry;
 
-        public static API.LuaState New()
+        public LuaState()
         {
-            var registry = LuaTable.newLuaTable(0, 0);
-            registry.put(Consts.LUA_RIDX_GLOBALS, LuaTable.newLuaTable(0, 0));
-            var ls = new LuaState
+            if(registry == null)
             {
-                registry = registry,
-            };
-            ls.pushLuaStack(LuaStack.newLuaStack(Consts.LUA_MINSTACK, ls));
-            return ls;
+                registry = new LuaTable(0, 0);
+            }
+            
+            registry.put(Consts.LUA_RIDX_GLOBALS, new LuaTable(0, 0));
+            LuaStack stack = new LuaStack(this);
+            stack.state = this;
+            pushLuaStack(stack);
         }
 
 
@@ -44,13 +45,13 @@ namespace luacsharp.state
 
         public bool CheckStack(int n)
         {
-            stack.check(n);
+            // stack.check(n);
             return true;
         }
 
         public int GetTop()
         {
-            return stack.top;
+            return stack.top();
         }
 
         public void Pop(int n)
@@ -89,7 +90,7 @@ namespace luacsharp.state
 
         public void Rotate(int idx, int n)
         {
-            var t = stack.top - 1;
+            var t = stack.top() - 1;
             var p = stack.absIndex(idx) - 1;
             int m;
             if (n >= 0)
@@ -114,7 +115,7 @@ namespace luacsharp.state
                 throw new Exception("stack overflow!");
             }
 
-            var n = stack.top - newTop;
+            var n = stack.top() - newTop;
             if (n > 0)
             {
                 for (var i = 0; i < n; i++)

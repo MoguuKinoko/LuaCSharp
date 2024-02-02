@@ -61,6 +61,7 @@
         <Compile Include="state\LuaState.cs" />
         <Compile Include="state\LuaTable.cs" />
         <Compile Include="state\LuaValue.cs" />
+        <Compile Include="state\Upvalue.cs" />
         <Compile Include="util\ConvertUtil.cs" />
         <Compile Include="vm\Fpb.cs" />
         <Compile Include="vm\InstCall.cs" />
@@ -75,6 +76,7 @@
     </ItemGroup>
     <ItemGroup>
       <Content Include="lua\chapter10.lua" />
+      <Content Include="lua\chapter11.lua" />
       <Content Include="lua\hello_world.lua" />
       <Content Include="lua\sum.lua" />
       <Content Include="lua\test.lua" />

@@ -7,74 +7,90 @@ namespace luacsharp.state
 {
     public class LuaStack
     {
-        public object[] slots;
+        public List<object> slots;
         internal LuaState state;
-        internal int top;
         internal LuaStack prev;
         internal Closure closure;
-        internal object[] varargs;
+        internal List<object> varargs;
         internal int pc;
         internal Dictionary<int, Upvalue> openuvs;
 
-        internal static LuaStack newLuaStack(int size, LuaState state)
+        // internal static LuaStack newLuaStack(int size, LuaState state)
+        // {
+        //     return new LuaStack
+        //     {
+        //         slots = new object[size],
+        //         top = 0,
+        //         state = state
+        //     };   
+        // }
+
+        internal LuaStack(LuaState state)
         {
-            return new LuaStack
-            {
-                slots = new object[size],
-                top = 0,
-                state = state
-            };
+            slots = new List<object>();
+            this.state = state;
+        }
+        
+        internal int top()
+        {
+            return slots.Count();
         }
 
-        internal void check(int n)
-        {
-            var free = slots.Length - top;
-            var slotList = slots.ToList();
-            for (var i = free; i < n; i++)
-            {
-                slotList.Add(null);
-            }
-
-            slots = slotList.ToArray();
-        }
+        // internal void check(int n)
+        // {
+        //     var free = slots.Length - top;
+        //     var slotList = slots.ToList();
+        //     for (var i = free; i < n; i++)
+        //     {
+        //         slotList.Add(null);
+        //     }
+        //
+        //     slots = slotList.ToArray();
+        // }
 
         internal void push(object val)
         {
-            if (top == slots.Length)
+            if (slots.Count() > slots.Capacity)
             {
-                throw new Exception("stack overflow!");
+                throw new StackOverflowException();
             }
 
-            slots[top] = val;
-
-            top++;
+            slots.Add(val);
         }
 
         internal int absIndex(int idx)
         {
-            if (idx <= Consts.LUA_REGISTRYINDEX)
-            {
-                return idx;
-            }
-            if (idx > 0)
-            {
-                return idx;
-            }
-
-            return idx + top + 1;
+            return idx >= 0 || idx <= Consts.LUA_REGISTRYINDEX
+                ? idx
+                : idx + slots.Count() + 1;
         }
 
         internal bool isValid(int idx)
         {
             if (idx < Consts.LUA_REGISTRYINDEX)
             {
-                var uvIdx = Consts.LUA_REGISTRYINDEX - idx - 1;
-                var c = closure;
-                return c != null && (uvIdx < c.upvals.Length);
+                /* upvalues */
+                int uvIdx = Consts.LUA_REGISTRYINDEX - idx - 1;
+                return closure != null && uvIdx < closure.upvals.Length;
+            }
+
+            if (idx == Consts.LUA_REGISTRYINDEX)
+            {
+                return true;
             }
 
             var absIdx = absIndex(idx);
-            return absIdx > 0 && absIdx <= top;
+            return absIdx > 0 && absIdx <= slots.Count();
+
+//            if (idx < Consts.LUA_REGISTRYINDEX)
+//            {
+//                var uvIdx = Consts.LUA_REGISTRYINDEX - idx - 1;
+//                var c = closure;
+//                return c != null && (uvIdx < c.upvals.Length);
+//            }
+//
+//            var absIdx = absIndex(idx);
+//            return absIdx > 0 && absIdx <= top;
         }
 
         internal object get(int idx)
@@ -88,7 +104,7 @@ namespace luacsharp.state
                     return null;
                 }
 
-                return c.upvals[uvIdx].val;
+                return c.upvals[uvIdx].Get();
             }
 
             if (idx == Consts.LUA_REGISTRYINDEX)
@@ -97,7 +113,7 @@ namespace luacsharp.state
             }
 
             var absIdx = absIndex(idx);
-            if (absIdx > 0 && absIdx <= top)
+            if (absIdx > 0 && absIdx <= top())
             {
                 return slots[absIdx - 1];
             }
@@ -107,46 +123,34 @@ namespace luacsharp.state
 
         internal object pop()
         {
-            if (top < 1)
-            {
-                throw new Exception("stack overflow!");
-            }
-
-            top--;
-            var val = slots[top];
-            slots[top] = null;
-            return val;
+            var v = slots.Last();
+            slots.RemoveAt(slots.Count - 1);
+            return v;
         }
 
-        internal void pushN(object[] vals, int n)
+        internal void pushN(List<object> vals, int n)
         {
-            var nVals = vals.Length;
+            int nVals = vals?.Count() ?? 0;
             if (n < 0)
             {
                 n = nVals;
             }
 
-            for (var i = 0; i < n; i++)
+            for (int i = 0; i < n; i++)
             {
-                if (i < nVals)
-                {
-                    push(vals[i]);
-                }
-                else
-                {
-                    push(null);
-                }
+                push(i < nVals ? vals[i] : null);
             }
         }
 
-        internal object[] popN(int n)
+        internal List<object> popN(int n)
         {
-            var vals = new object[n];
-            for (var i = n - 1; i >= 0; i--)
+            var vals = new List<object>(n);
+            for (int i = 0; i < n; i++)
             {
-                vals[i] = pop();
+                vals.Add(pop());
             }
 
+            vals.Reverse();
             return vals;
         }
 
@@ -155,34 +159,32 @@ namespace luacsharp.state
         {
             if (idx < Consts.LUA_REGISTRYINDEX)
             {
-                var uvIdx = Consts.LUA_REGISTRYINDEX - idx - 1;
-                var c = closure;
-                if (c != null && uvIdx < c.upvals.Length)
+                /* upvalues */
+                int uvIdx = Consts.LUA_REGISTRYINDEX - idx - 1;
+                if (closure != null
+                    && closure.upvals.Length > uvIdx
+                    && closure.upvals[uvIdx] != null)
                 {
-                    c.upvals[uvIdx].val = val;
-                    return;
+                    closure.upvals[uvIdx].Set(val);
                 }
+
+                return;
             }
 
-            var absIdx = absIndex(idx);
-            if (absIdx <= 0 || absIdx > top)
+            if (idx == Consts.LUA_REGISTRYINDEX)
             {
-                throw new Exception("invalid index!");
+                state.registry = (LuaTable) val;
+                return;
             }
 
-            slots[absIdx - 1] = val;
+            int absIdx = absIndex(idx);
+            slots.RemoveAt(absIdx - 1);
+            slots.Insert(absIdx - 1, val);
         }
 
         internal void reverse(int from, int to)
         {
-            if (to > from)
-            {
-                Array.Reverse(slots, from, to - from + 1);
-            }
-            else if (to < from)
-            {
-                Array.Reverse(slots, to, from - to + 1);
-            }
+            slots.Reverse(from, to - from + 1);
         }
     }
 }
