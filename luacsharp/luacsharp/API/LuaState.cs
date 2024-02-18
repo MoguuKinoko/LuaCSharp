@@ -82,5 +82,7 @@ namespace luacsharp.API
         LuaType RawGetI(int idx, long i);
         void RawSetI(int idx, long i);
 
+        bool Next(int idx);
+
     }
 }

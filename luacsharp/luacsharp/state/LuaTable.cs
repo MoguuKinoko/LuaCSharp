@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using luacsharp.API;
 using LuaType = System.Int32;
 using Math = luacsharp.number.Math;
 
@@ -8,15 +9,18 @@ namespace luacsharp.state
 {
     public class LuaTable
     {
-        private object[] arr;
+        private object[] _arr;
         private Dictionary<object, object> _map;
+        private Dictionary<object, object> _keys;
         public LuaTable metatable;
+        private object _lastKey;
+        private bool _changed;
 
         public LuaTable(int nArr, int nRec)
         {
             if (nArr >= 0)
             {
-                arr = new object[nArr];
+                _arr = new object[nArr];
             }
 
             if (nRec >= 0)
@@ -24,16 +28,71 @@ namespace luacsharp.state
                 _map = new Dictionary<object, object>(nRec);
             }
         }
+        
+        public object NextKey(object key)
+        {
+            if (_keys is null || key is null && _changed)
+            {
+                InitKeys();
+                _changed = false;
+            }
+
+            _keys.TryGetValue(key ?? Consts.NULL_ALIAS, out var nextKey);
+
+            if (nextKey is null && key != null && key != _lastKey)
+            {
+                throw new Exception("invalid key to 'next'");
+            }
+
+            return nextKey;
+        }
+
+        private void InitKeys()
+        {
+            if (_keys is null)
+            {
+                _keys = new Dictionary<object, object>();
+            }
+            else
+            {
+                _keys.Clear();
+            }
+
+            object key = Consts.NULL_ALIAS;
+            if (_arr != null)
+            {
+                for (var i = 0; i < _arr.Length; i++)
+                {
+                    if (_arr[i] == null) continue;
+                    long nextKey = i + 1;
+                    _keys.Add(key, nextKey);
+                    key = nextKey;
+                }
+            }
+
+            if (_map != null)
+            {
+                foreach (var k in _map.Keys)
+                {
+                    var v = _map[k];
+                    if (v is null) continue;
+                    _keys.Add(key, k);
+                    key = k;
+                }
+            }
+
+            _lastKey = key;
+        }
 
         public object get(object key)
         {
             key = _floatToInteger(key);
-            if (LuaValue.isInteger(key) && arr != null)
+            if (LuaValue.isInteger(key) && _arr != null)
             {
                 var idx = LuaValue.toInteger(key);
-                if (idx >= 1 && idx <= arr.Length)
+                if (idx >= 1 && idx <= _arr.Length)
                 {
-                    return arr[idx - 1];
+                    return _arr[idx - 1];
                 }
             }
 
@@ -61,26 +120,26 @@ namespace luacsharp.state
 
         void _shrinkArray()
         {
-            for (var i = arr.Length - 1; i >= 0; i--)
+            for (var i = _arr.Length - 1; i >= 0; i--)
             {
-                if (arr[i] == null)
+                if (_arr[i] == null)
                 {
-                    Array.Copy(arr, 0, arr, 0, i);
+                    Array.Copy(_arr, 0, _arr, 0, i);
                 }
             }
         }
 
         void _expandArray()
         {
-            for (var idx = arr.Length + 1; true; idx++)
+            for (var idx = _arr.Length + 1; true; idx++)
             {
                 if (_map != null && _map.ContainsKey(idx))
                 {
                     var val = _map.Values.ElementAt(idx);
                     _map.Remove(idx);
-                    var b = arr.ToList();
+                    var b = _arr.ToList();
                     b.Add(val);
-                    arr = b.ToArray();
+                    _arr = b.ToArray();
                 }
                 else
                 {
@@ -91,7 +150,7 @@ namespace luacsharp.state
 
         public int len()
         {
-            return arr.Length;
+            return _arr.Length;
         }
 
         public void put(object key, object val)
@@ -113,10 +172,10 @@ namespace luacsharp.state
                 var idx = LuaValue.toInteger(key);
                 if (idx >= 1)
                 {
-                    var arrLen = arr?.Length ?? 0;
+                    var arrLen = _arr?.Length ?? 0;
                     if (idx <= arrLen)
                     {
-                        arr[idx - 1] = val;
+                        _arr[idx - 1] = val;
                         if (idx == arrLen && val == null)
                         {
                             _shrinkArray();
@@ -131,17 +190,17 @@ namespace luacsharp.state
 
                         if (val != null)
                         {
-                            if (arr == null)
+                            if (_arr == null)
                             {
                                 var b = new List<object> {val};
-                                arr = b.ToArray();
+                                _arr = b.ToArray();
                                 _expandArray();
                             }
                             else
                             {
-                                var b = arr.ToList();
+                                var b = _arr.ToList();
                                 b.Add(val);
-                                arr = b.ToArray();
+                                _arr = b.ToArray();
                                 _expandArray();
                             }
                         }

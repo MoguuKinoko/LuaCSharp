@@ -9,7 +9,7 @@ namespace luacsharp.state
         internal binchunk.Prototype proto;
         internal CsharpFunction csharpFunc;
         internal Upvalue[] upvals;
-
+  
         internal static Closure newLuaClosure(binchunk.Prototype proto)
         {
             var c = new Closure()

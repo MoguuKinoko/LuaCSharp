@@ -15,14 +15,16 @@ namespace luacsharp.state
         
         public void SetField(int idx, string k)
         {
+            var t = stack.get(idx);
             var v = stack.pop();
-            setTable(idx, k, v, false);
+            setTable(t, k, v, false);
         }
 
         public void SetI(int idx, long n)
         {
+            var t = stack.get(idx);
             var v = stack.pop();
-            setTable(idx, n, v, false);
+            setTable(t, n, v, false);
         }
 
         public void SetGlobal(string name)

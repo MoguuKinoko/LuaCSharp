@@ -33,6 +33,9 @@ namespace luacsharp
                     ls.Register("print", print);
                     ls.Register("getmetatable", getMetatable);
                     ls.Register("setmetatable", setMetatable);
+                    ls.Register("next", next);
+                    ls.Register("pairs", pairs);
+                    ls.Register("ipairs", iPairs);
                     ls.Load(ref data, "chunk", "b");
                     ls.Call(0, 0);
                 }
@@ -276,6 +279,43 @@ namespace luacsharp
             }
 
             Console.WriteLine();
+        }
+        
+        private static int next(LuaState ls)
+        {
+            ls.SetTop(2);
+            if (ls.Next(1))
+            {
+                return 2;
+            }
+            else
+            {
+                ls.PushNil();
+                return 1;
+            }
+        }
+        
+        private static int pairs(LuaState ls)
+        {
+            ls.PushCsharpFunction(next); /* will return generator, */
+            ls.PushValue(1); /* state, */
+            ls.PushNil();
+            return 3;
+        }
+
+        private static int iPairs(LuaState ls)
+        {
+            ls.PushCsharpFunction(iPairsAux); /* iteration function */
+            ls.PushValue(1); /* state */
+            ls.PushInteger(0); /* initial value */
+            return 3;
+        }
+        
+        private static int iPairsAux(LuaState ls)
+        {
+            var i = ls.ToInteger(2) + 1;
+            ls.PushInteger(i);
+            return ls.GetI(1, i) == Consts.LUA_TNIL ? 1 : 2;
         }
         
         private static int getMetatable(LuaState ls)

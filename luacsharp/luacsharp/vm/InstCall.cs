@@ -150,5 +150,15 @@ namespace luacsharp.vm
             vm.GetTable(b);
             vm.Replace(a);
         }
+        
+        internal static void TForCall(Instruction i, ref LuaVM vm)
+        {
+            var (a, _, c ) = i.ABC();
+            a += 1;
+
+            _pushFuncAndArgs(a, 3, ref vm);
+            vm.Call(2, c);
+            _popResults(a + 3, c + 1, ref vm);
+        }
     }
 }

@@ -131,8 +131,8 @@ namespace luacsharp.vm
             new opcode(0, 0, OpArgU, OpArgN, IABC /* */, "RETURN  ", InstCall._return), // return R(A), ... ,R(A+B-2)
             new opcode(0, 1, OpArgR, OpArgN, IAsBx /**/, "FORLOOP ", InstFor.forLoop),
             new opcode(0, 1, OpArgR, OpArgN, IAsBx /**/, "FORPREP ", InstFor.forPrep), // R(A)-=R(A+2); pc+=sBx
-            new opcode(0, 0, OpArgN, OpArgU, IABC /* */, "TFORCALL", null),
-            new opcode(0, 1, OpArgR, OpArgN, IAsBx /**/, "TFORLOOP", null),
+            new opcode(0, 0, OpArgN, OpArgU, IABC /* */, "TFORCALL", InstCall.TForCall),
+            new opcode(0, 1, OpArgR, OpArgN, IAsBx /**/, "TFORLOOP", InstFor.TForLoop),
             new opcode(0, 0, OpArgU, OpArgU, IABC /* */, "SETLIST ", InstTable.setList),
             new opcode(0, 1, OpArgU, OpArgN, IABx /* */, "CLOSURE ", InstCall.closure),
             new opcode(0, 1, OpArgU, OpArgN, IABC /* */, "VARARG  ", InstCall.vararg),

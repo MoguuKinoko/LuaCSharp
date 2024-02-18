@@ -2,6 +2,8 @@ namespace luacsharp.API
 {
     public class Consts
     {
+        public const string NULL_ALIAS = "null";
+        
         internal const int LUA_TNONE = -1;
         public const int LUA_TNIL = 0;
         public const int LUA_TBOOLEAN = 1;

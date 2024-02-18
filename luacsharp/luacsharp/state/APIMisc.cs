@@ -81,5 +81,23 @@ namespace luacsharp.state
 
             return 0;
         }
+        
+        public bool Next(int idx)
+        {
+            var val = stack.get(idx);
+            if (!(val is LuaTable t))
+            {
+                throw new Exception("table expected!");
+            }
+            var key = stack.pop();
+            var nextKey = t.NextKey(key);
+            if (nextKey == null)
+            {
+                return false;
+            }
+            stack.push(nextKey);
+            stack.push(t.get(nextKey));
+            return true;
+        }
     }
 }
