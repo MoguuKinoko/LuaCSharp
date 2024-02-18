@@ -128,5 +128,30 @@ namespace luacsharp.state
                 stack.pushN(results, nResults);
             }
         }
+        
+        public int PCall(int nArgs, int nResults, int msgh)
+        {
+            var caller = stack;
+            try
+            {
+                Call(nArgs, nResults);
+                return Consts.LUA_OK;
+            }
+            catch (Exception e)
+            {
+                if (msgh != 0)
+                {
+                    throw;
+                }
+
+                while (stack != caller)
+                {
+                    popLuaStack();
+                }
+
+                stack.push(e.Message); // TODO
+                return Consts.LUA_ERRRUN;
+            }
+        }
     }
 }

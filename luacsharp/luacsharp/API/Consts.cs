@@ -2,6 +2,15 @@ namespace luacsharp.API
 {
     public class Consts
     {
+        internal const byte LUA_OK = 0;
+        internal const byte LUA_YIELD = 1;
+        internal const byte LUA_ERRRUN = 2;
+        internal const byte LUA_ERRSYNTAX = 3;
+        internal const byte LUA_ERRMEM = 4;
+        internal const byte LUA_ERRGCMM = 5;
+        internal const byte LUA_ERRERR = 6;
+        internal const byte LUA_ERRFILE = 7;
+        
         public const string NULL_ALIAS = "null";
         
         internal const int LUA_TNONE = -1;

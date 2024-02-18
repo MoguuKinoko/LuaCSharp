@@ -36,6 +36,10 @@ namespace luacsharp
                     ls.Register("next", next);
                     ls.Register("pairs", pairs);
                     ls.Register("ipairs", iPairs);
+                    ls.Register("error", Error);
+                    ls.Register("pcall", PCall);
+                    
+                    
                     ls.Load(ref data, "chunk", "b");
                     ls.Call(0, 0);
                 }
@@ -333,5 +337,21 @@ namespace luacsharp
             ls.SetMetatable(1);
             return 1;
         }
+        
+        private static int Error(LuaState ls)
+        {
+            return ls.Error();
+        }
+
+        private static int PCall(LuaState ls)
+        {
+            var nArgs = ls.GetTop() - 1;
+            var status = ls.PCall(nArgs, -1, 0);
+            ls.PushBoolean(status == Consts.LUA_OK);
+            ls.Insert(1);
+            return ls.GetTop();
+        }
+        
+        
     }
 }

@@ -99,5 +99,11 @@ namespace luacsharp.state
             stack.push(t.get(nextKey));
             return true;
         }
+
+        public int Error()
+        {
+            var err = stack.pop();
+            throw new Exception(Convert.ToString(err));
+        }
     }
 }

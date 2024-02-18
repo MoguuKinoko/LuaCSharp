@@ -78,6 +78,7 @@
       <Content Include="lua\chapter10.lua" />
       <Content Include="lua\chapter11.lua" />
       <Content Include="lua\chapter12.lua" />
+      <Content Include="lua\chapter13.lua" />
       <Content Include="lua\hello_world.lua" />
       <Content Include="lua\sum.lua" />
       <Content Include="lua\test.lua" />

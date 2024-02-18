@@ -83,6 +83,9 @@ namespace luacsharp.API
         void RawSetI(int idx, long i);
 
         bool Next(int idx);
+        
+        int Error();
+        int PCall(int nArgs, int nResults, int msgh);
 
     }
 }
