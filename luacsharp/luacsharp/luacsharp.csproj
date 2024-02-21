@@ -43,6 +43,9 @@
         <Compile Include="binchunk\Reader.cs" />
         <Compile Include="API\Consts.cs" />
         <Compile Include="API\LuaState.cs" />
+        <Compile Include="compiler\lexer\CharUtil.cs" />
+        <Compile Include="compiler\lexer\Lexer.cs" />
+        <Compile Include="compiler\lexer\Token.cs" />
         <Compile Include="number\Math.cs" />
         <Compile Include="number\Parser.cs" />
         <Compile Include="program.cs" />
